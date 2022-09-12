@@ -1,6 +1,6 @@
 ; File: two_calculators.l
 ; ------
-; Problem: Define a function to simulate a calculator that is consistent
+; Problem 1: Define a function to simulate a calculator that is consistent
 ; with the following specifications:
 ;   - The name of the function will be calculator-LR.
 ;   - The function takes no parameters and returns no values.
@@ -19,7 +19,6 @@
 
 ; Code modified from Professor Graci's lecture Code
 
-; 1 + 2 * 3
 ( defun calculator-LR (&aux input operator1 operator2 operands result1 result2)
     ( format t "Expression? " )
     ( setf input ( list (read) (read) (read) (read) (read) ) )
@@ -34,3 +33,21 @@
 
     ( format t "Result: ~A~%" result2)
 )
+
+
+; Problem 2: Define a function to simulate a calculator that is 
+; consistent with the following specifications:
+;   - The name of the function will be calculator-RL.
+;   - The function takes no parameters and returns no values.
+;   - The function repeatedly reads and evaluates a 
+;     parenthesis-free infix expression, from right
+;     to left, of the form operand operator operand 
+;     operator operand, and prints the result.
+;   - The calculator will evaluate the rightmost operator prior 
+;     to evaluating the leftmost operator, which is what is 
+;     meant by “from right to left”. (Thus, for example, 1 + 2 * 3 
+;     would be interpreted as ( 1 + ( 2 * 3 )).)
+;   - The function makes good use of the funcall function.
+;   - The calculator need only handle the four basic 
+;     arithmetic operators and numeric operands.
+; ------
