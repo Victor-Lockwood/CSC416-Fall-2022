@@ -1,5 +1,4 @@
-
-; File: distance_between_two_points.l 
+; File: perimeter_of_triangle.l 
 ; ------
 ; Problem:
 ; Define a function to compute the distance between
@@ -10,6 +9,18 @@
 ;   - The function returns the distance between (x1,y1) and (x2,y2)
 ;
 ; Referenced this for the distance formula: https://www.calculator.net/distance-calculator.html
+;
+; Problem 2:
+; Define a function, which makes good use of the
+; distance function, to compute the perimeter of a 
+; triangle and which is consistent with the
+; following specifications:
+;   - The name of the function will be perimeter.
+;   - It will receive six parameters called x1 and y1 (point 1), 
+;     and x2 and y2 (point 2) and x3 and y3 (point 3) – 
+;     in that order, from left to right.
+;   - The function returns the perimeter of the triangle 
+;     defined by the three points.
 ; -----
 
 ( defun distance (x1 y1 x2 y2 &aux result)
@@ -21,6 +32,5 @@
         ) 
     ) 
   )
-
   result
 )
