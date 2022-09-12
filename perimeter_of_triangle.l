@@ -34,3 +34,11 @@
   )
   result
 )
+
+( defun perimeter (x1 y1 x2 y2 x3 y3 &aux distance1 distance2 distance3 result)
+    ( setf distance1 ( distance x1 y1 x2 y2 ) )
+    ( setf distance2 ( distance x1 y1 x3 y3 ) )
+    ( setf distance3 ( distance x2 y2 x3 y3 ) )
+    ( setf result ( + distance1 distance2 distance3 ) )
+    result
+)
