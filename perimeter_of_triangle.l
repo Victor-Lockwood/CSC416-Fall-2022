@@ -9,7 +9,7 @@
 ;   - The function returns the distance between (x1,y1) and (x2,y2)
 ;
 ; Referenced this for the distance formula: https://www.calculator.net/distance-calculator.html
-;
+; -----
 ; Problem 2:
 ; Define a function, which makes good use of the
 ; distance function, to compute the perimeter of a 
