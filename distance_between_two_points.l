@@ -10,3 +10,15 @@
 ;   - The function returns the distance between (x1,y1) and (x2,y2)
 ; -----
 
+( defun distance (x1 y1 x2 y2 &aux result)
+  ( setf result 
+    ( sqrt 
+        ( + 
+            ( expt ( - x2 x1 ) 2 ) 
+            ( expt ( - y2 y1 ) 2 ) 
+        ) 
+    ) 
+  )
+
+  result
+)
