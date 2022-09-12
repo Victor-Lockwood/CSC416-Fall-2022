@@ -16,3 +16,21 @@
 ;   - The calculator need only handle the four basic arithmetic 
 ;     operators and numeric operands
 ; ------
+
+; Code modified from Professor Graci's lecture Code
+
+; 1 + 2 * 3
+( defun calculator-LR (&aux input operator1 operator2 operands result1 result2)
+    ( format t "Expression? " )
+    ( setf input ( list (read) (read) (read) (read) (read) ) )
+    ( setf operator1 ( second input ) )
+    ( setf operator2 ( nth 3 input ) )
+
+    ( setf operands ( list ( first input ) ( third input ) ) )
+    ( setf result1 ( apply operator1 operands ) )
+
+    ( setf operands ( list result1 ( nth 4 input ) ) )
+    ( setf result2 ( apply operator2 operands ) )
+
+    ( format t "Result: ~A~%" result2)
+)
