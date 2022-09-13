@@ -22,6 +22,7 @@
 ( defun calculator-LR (&aux input operator1 operator2 operands result1 result2)
     ( format t "Expression? " )
     ( setf input ( list (read) (read) (read) (read) (read) ) )
+
     ( setf operator1 ( second input ) )
     ( setf operator2 ( nth 3 input ) )
 
@@ -51,3 +52,22 @@
 ;   - The calculator need only handle the four basic 
 ;     arithmetic operators and numeric operands.
 ; ------
+
+; Code modified from Professor Graci's lecture Code
+
+( defun calculator-RL (&aux input operator1 operator2 operand1 operand2 operand3 result1 result2)
+    ( format t "Expression? " )
+    ( setf input ( list (read) (read) (read) (read) (read) ) )
+
+    ( setf operator1 ( nth 3 input ) )
+    ( setf operator2 ( second input ) )
+
+    ( setf operand1 ( third input ) )
+    ( setf operand2 ( nth 4 input ) )
+    ( setf operand3 ( first input ) )
+
+    ( setf result1 ( funcall operator1 operand1 operand2 ) )
+    ( setf result2 ( funcall operator2 result1 operand3 ) )
+
+    ( format t "Result: ~A~%" result2)
+)
