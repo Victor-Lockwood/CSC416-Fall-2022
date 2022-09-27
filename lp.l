@@ -46,6 +46,33 @@
     )
 )
 
+; Gets the object at position in list l
+( defun select ( position l )
+    ( cond
+        ( ( null l )
+            nil
+        )
+        ( ( > position ( length l ) )
+            nil
+        )
+        ( ( = ( + position 1 ) ( length l ) ) 
+           ( rac l )
+        )
+        ( t
+            ( select position ( rdc l ) )
+        )
+    )
+)
+
+; Get a random object from list l
+( defun pick ( l )
+    ( setf list-length ( length l ) )
+    ( setf start-num ( random list-length ) )
+    ( setf position ( - start-num 1 ) )
+    ( setf pick ( select position l ) )
+    pick
+)
+
 ; Returns T if the list reads the same forwards and backwards at 
 ; the top level of conception, NIL otherwise
 ( defun palindrome-p ( l )
@@ -77,6 +104,18 @@
     )
 )
 
+; Returns the product of a list of numbers
+( defun product ( l )
+    ( cond
+        ( ( null l )
+            1
+        )
+        ( t
+            ( * ( car l ) ( product ( cdr l ) ) )
+        )
+    )
+)
+
 ; Returns the list of the integers from 1 to n
 ( defun iota ( n )
     ( cond
@@ -88,3 +127,16 @@
         )
     )
 )
+
+; Returns a list where object lo is repeated n times
+( defun duplicate ( n lo )
+    ( cond
+        ( ( = n 0 )
+            ()
+        )
+        ( t
+            ( snoc lo ( duplicate ( - n 1 ) lo ) )
+        )
+    )
+)
+
