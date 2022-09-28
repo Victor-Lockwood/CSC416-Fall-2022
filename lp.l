@@ -128,6 +128,20 @@
     )
 )
 
+; Returns the factorial of a given integer 
+( defun factorial ( n )
+    ( setf numbers ( iota n ) )
+    ( setf factorial ( product numbers ) )
+    factorial
+)
+
+; Raises n to the exponent power 
+( defun power ( n exponent ) 
+    ( setf numbers ( duplicate exponent n ) )
+    ( setf power ( product numbers ) )
+    power
+)
+
 ; Returns a list where object lo is repeated n times
 ( defun duplicate ( n lo )
     ( cond
@@ -140,3 +154,34 @@
     )
 )
 
+; Returns of list objects in given input that evaluate to true with the predicate
+( defun filter-in ( predicate input )
+    ( cond
+        ( ( null input )
+            ()
+        )
+        ( ( funcall predicate ( car input ) )
+            ( snoc ( car input ) ( filter-in predicate ( cdr input ) ) )
+        )
+        ( t
+            ( filter-in predicate ( cdr input ) )
+        )
+    )
+)
+
+; Returns of list objects in given input that evaluate to true with the predicate
+; Referenced Nahyeon Kim's document for assistance with demo input:
+; https://drive.google.com/file/d/1VmzKbxjO6CRaGvjD81TpUavhQXC0jmQU/view
+( defun filter-out ( predicate input )
+    ( cond
+        ( ( null input )
+            ()
+        )
+        ( ( not ( funcall predicate ( car input ) ) )
+            ( snoc ( car input ) ( filter-out predicate ( cdr input ) ) )
+        )
+        ( t
+            ( filter-out predicate ( cdr input ) )
+        )
+    )
+)
