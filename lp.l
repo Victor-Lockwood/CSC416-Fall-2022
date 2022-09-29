@@ -67,8 +67,7 @@
 ; Get a random object from list l
 ( defun pick ( l )
     ( setf list-length ( length l ) )
-    ( setf start-num ( random list-length ) )
-    ( setf position ( - start-num 1 ) )
+    ( setf position ( random list-length ) )
     ( setf pick ( select position l ) )
     pick
 )
@@ -170,7 +169,8 @@
 )
 
 ; Returns of list objects in given input that evaluate to true with the predicate
-; Referenced Nahyeon Kim's document for assistance with demo input:
+; Referenced Nahyeon Kim's document for assistance with demo input and creating
+; a new predicate:
 ; https://drive.google.com/file/d/1VmzKbxjO6CRaGvjD81TpUavhQXC0jmQU/view
 ( defun filter-out ( predicate input )
     ( cond
@@ -182,6 +182,35 @@
         )
         ( t
             ( filter-out predicate ( cdr input ) )
+        )
+    )
+)
+
+; Returns of list objects in given input with objects matching remove-obj removed
+( defun take-from ( remove-obj input  )
+    ( cond
+        ( ( null input )
+            ()
+        )
+        ( ( not ( equal ( rac input ) remove-obj ) )
+            ( snoc ( rac input ) ( take-from remove-obj ( rdc input ) ) )
+        )
+        ( t
+            ( take-from remove-obj ( rdc input ) )
+        )
+    )
+)
+
+; Returns a random permutation of the given list
+( defun random-permutation ( l )
+    ( cond 
+        ( ( null l )
+            ()
+        )
+        ( t 
+            ( setf selection ( pick l ) )
+            ( setf shortened-list ( remove selection l :count 1 ) )
+            ( snoc selection ( random-permutation shortened-list ) )
         )
     )
 )
