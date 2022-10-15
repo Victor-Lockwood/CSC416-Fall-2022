@@ -97,7 +97,7 @@
 
 ( defun demo--deal-hands ()
     ( format t ">>> Testing: deal-hands~%" )
-    
+
     ( deal-hands )
     ( format t "--- *hand1* = ~A~%" *hand1*)
     ( format t "--- *hand2* = ~A~%" *hand2*)
@@ -133,5 +133,89 @@
     ( randomly-discard-cards )
     ( format t "--- *hand1* = ~A~%" *hand1* )
     ( format t "--- *hand2* = ~A~%" *hand2* )
+    nil
+)
+
+
+; ------------------------------
+; PART 3
+; ------------------------------
+
+( defun replace-cards ()
+    ( replace-card-in-hand1 )
+    ( replace-card-in-hand2 )
+    nil
+)
+
+( defun replace-card-in-hand1 ()
+    ( setf first-card ( car *deck* ) )
+    ( setf position-of-void ( position nil *hand1* ) )
+    ( setf ( nth position-of-void *hand1* ) first-card )
+
+    ( setf new-deck ( remove first-card *deck* :count 1 ) )
+    ( setf *deck* new-deck ) 
+    nil
+)
+
+( defun replace-card-in-hand2 ()
+    ( setf first-card ( car *deck* ) )
+    ( setf position-of-void ( position nil *hand2* ) )
+    ( setf ( nth position-of-void *hand2* ) first-card )
+
+    ( setf new-deck ( remove first-card *deck* :count 1 ) )
+    ( setf *deck* new-deck ) 
+    nil
+)
+
+( defun demo--replace-cards ()
+    ( format t ">>> Testing: replace-cards ~%" )
+
+    ( deal-hands )
+    ( format t "--- *hand1* = ~A~%" *hand1* )
+    ( format t "--- *hand2* = ~A~%" *hand2* )
+
+    ( randomly-discard-cards )
+    ( format t "--- *hand1* = ~A~%" *hand1* )
+    ( format t "--- *hand2* = ~A~%" *hand2* )
+
+    ( replace-cards )
+    ( format t "--- *hand1* = ~A~%" *hand1* )
+    ( format t "--- *hand2* = ~A~%" *hand2* )
+    nil
+)
+
+( defun players-each-take-a-turn () 
+    ( randomly-discard-cards )
+    ( replace-cards )
+)
+
+( defun demo--players-each-take-a-turn ()
+    ( format t ">>> Testing: players-each-take-a-turn~%" )
+
+    ( deal-hands )
+    ( format t "--- The hands ...~%" )
+    ( format t "--- *hand1* = ~A~%" *hand1* )
+    ( format t "--- *hand2* = ~A~%" *hand2* )
+
+    ( players-each-take-a-turn )
+    ( format t "--- Each player takes a turn ...~%" )
+    ( format t "--- *hand1* = ~A~%" *hand1* )
+    ( format t "--- *hand2* = ~A~%" *hand2* )
+
+    ( players-each-take-a-turn )
+    ( format t "--- Each player takes a turn ...~%" )
+    ( format t "--- *hand1* = ~A~%" *hand1* )
+    ( format t "--- *hand2* = ~A~%" *hand2* )
+
+    ( players-each-take-a-turn )
+    ( format t "--- Each player takes a turn ...~%" )
+    ( format t "--- *hand1* = ~A~%" *hand1* )
+    ( format t "--- *hand2* = ~A~%" *hand2* )
+
+    ( players-each-take-a-turn )
+    ( format t "--- Each player takes a turn ...~%" )
+    ( format t "--- *hand1* = ~A~%" *hand1* )
+    ( format t "--- *hand2* = ~A~%" *hand2* )
+    
     nil
 )
