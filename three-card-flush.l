@@ -328,6 +328,90 @@
     nil
 )
 
+( defun straight-p ( hand )
+    ( setf sorted-hand ( sort-cards-rank hand ) )
+    ( setf last-rank ( get-number-value-rank ( car ( car sorted-hand ) ) ) )
+    ( setf rest-of-list ( cdr sorted-hand ) )
+    ( setf straight-p ( straight-p-helper last-rank rest-of-list ) )
+    straight-p
+)
+
+( defun straight-p-helper ( last-rank card-list )
+    ( cond 
+        ( ( equal ( length card-list ) 0 ) t )
+
+        ; Check if last-rank is one more than the rank of the first element of the card list
+        ( ( = last-rank ( + ( get-number-value-rank ( car ( car card-list ) ) ) 1 ) ) 
+            ( straight-p-helper ( get-number-value-rank ( car ( car card-list ) ) ) ( cdr card-list ) )
+        )
+
+        ( t nil )
+    )
+)
+
+( defun demo--straight-p ()
+    ( format t ">>> Testing: straight-p~%" )
+
+    ( setf hand '( ( 5 . spade) ( 3 . diamond ) ( 4 . spade ) ( 6 . club )) )
+    ( format t "~A " hand )
+    ( if ( straight-p hand )
+        ( format t "is a straight~%" )
+        ( format t "is not a straight~%" )
+    )
+
+    ( setf hand '( ( 5 . spade) ( 7 . diamond ) ( 4 . spade ) ( 8 . club ) ) )
+    ( format t "~A " hand )
+    ( if ( straight-p hand )
+        ( format t "is a straight~%" )
+        ( format t "is not a straight~%" )
+    )
+
+    ( setf hand '( ( king . heart ) ( queen . diamond ) ( ace . spade ) ( 10 . club )
+    ( jack . diamond ) ) )
+    ( format t "~A " hand )
+    ( if ( straight-p hand )
+        ( format t "is a straight~%" )
+        ( format t "is not a straight~%" )
+    )
+
+    ( setf hand '( ( ace . club ) ( 2 . diamond ) ( 3 . spade ) ) )
+    ( format t "~A " hand )
+    ( if ( straight-p hand )
+        ( format t "is a straight~%" )
+        ( format t "is not a straight~%" )
+    )
+
+    nil
+)
+
+( defun analyze-hand ( hand )
+    ( setf is-flush ( flush-p hand ) )
+    ( setf is-straight ( straight-p hand ) )
+    ( setf high-card ( high-card hand ) )
+    ( setf rank-high-card ( car high-card ) )
+    ( setf suit-high-card ( cdr high-card ) )
+
+    ( cond 
+        ( ( NOT is-flush ) 'bust )
+        ( ( NOT is-straight ) ( list rank-high-card 'high suit-high-card 'flush ) )
+        ( t ( list rank-high-card 'high 'straight suit-high-card 'flush ) )
+    )
+)
+
+( defun demo--analyze-hand ()
+    ( format t ">>> Testing: analyze-hand~%" )
+
+    ( setf hand '( ( 5 . spade) ( 3 . diamond ) ( 4 . spade ) ) )
+    ( format t "~A is a ~A~%" hand ( analyze-hand hand ) )
+
+    ( setf hand '( ( 5 . club) ( 9 . club ) ( 4 . club ) ) )
+    ( format t "~A is a ~A~%" hand ( analyze-hand hand ) )
+
+    ( setf hand '( ( queen . heart ) ( ace . heart ) ( king . heart ) ) )
+    ( format t "~A is a ~A~%" hand ( analyze-hand hand ) )
+    nil
+)
+
 ( defun sort-cards-suit ( card-list ) 
     ( sort card-list #'high-suit-p )
 )
