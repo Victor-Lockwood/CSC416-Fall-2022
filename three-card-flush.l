@@ -628,3 +628,105 @@
 
     nil
 )
+
+; ------------------------------
+; PART 6
+; ------------------------------
+
+( defun hand-rep ( internal-rep )
+    ( setf card1 ( first internal-rep ) )
+    ( setf card2 ( second internal-rep ) )
+    ( setf card3 ( third internal-rep ) )
+
+    ( setf card1-symbol-rank ( symbol-rank card1 ) ) ( setf card1-symbol-suit ( symbol-suit card1 ) )
+    ( setf card2-symbol-rank ( symbol-rank card2 ) ) ( setf card2-symbol-suit ( symbol-suit card2 ) )
+    ( setf card3-symbol-rank ( symbol-rank card3 ) ) ( setf card3-symbol-suit ( symbol-suit card3 ) )
+
+    ( setf external-rep1 ( cons card1-symbol-rank card1-symbol-suit ) )
+    ( setf external-rep2 ( cons card2-symbol-rank card2-symbol-suit ) )
+    ( setf external-rep3 ( cons card3-symbol-rank card3-symbol-suit ) )
+
+    ( setf hand-rep ( list external-rep1 external-rep2 external-rep3 ) )
+    hand-rep
+)
+
+( defun demo--hand-rep ( &aux hand )
+    ( establish-shuffled-deck )
+    ( setf internal ( list ( pop *deck* ) ( pop *deck* ) ( pop *deck* ) ) )
+    ( setf external ( hand-rep internal ) )
+    ( format t "~A --> ~A~%" internal external )
+    nil
+)
+
+( defun play-game ()
+    ( deal-hands )
+    ( make-moves )
+    ( report-the-result )
+)
+
+( defun make-moves ()
+    ( format t "~A ~A~%" ( hand-rep *hand1* ) ( hand-rep *hand2* ) )
+    ( if ( not ( game-over-p ) )
+        ( let ()
+            ( players-each-take-a-turn )
+            ( make-moves )
+        )
+    )
+    nil
+)
+
+( defun game-over-p ()
+    ( analyze-game )
+    ( or
+        ( not ( equal *game-state* '( bust bust ) ) )
+        ( null *deck* )
+    )
+)
+
+( defun demo--play-game ()
+    ( format t ">>> Testing: play-game~%" )
+    ( play-game )
+)
+
+( defun symbol-rank ( card )
+    ( setf rank ( car card ) )
+    ( cond
+      ( ( eq rank 10 )
+        'X
+      )
+      ( ( numberp rank )
+        rank
+      )
+      ( ( eq rank 'JACK )
+        'J
+      )
+      ( ( eq rank 'QUEEN )
+        'Q
+      )
+      ( ( eq rank 'KING )
+        'K
+      )
+      ( ( eq rank 'ACE )
+        'A
+      )
+   )
+)
+
+( defun symbol-suit ( card ) 
+    ( setf suit ( cdr card ) )
+    ( cond
+      ( ( eq suit 'CLUB )
+        'C
+      )
+      ( ( eq suit 'DIAMOND )
+        'D
+      )
+      ( ( eq suit 'HEART )
+        'H
+      )
+      ( ( eq suit 'SPADE )
+        'S
+      )
+   )
+)
+
