@@ -1,0 +1,38 @@
+$ clisp
+  i i i i i i i       ooooo    o        ooooooo   ooooo   ooooo
+  I I I I I I I      8     8   8           8     8     o  8    8
+  I  \ `+' /  I      8         8           8     8        8    8
+   \  `-+-'  /       8         8           8      ooooo   8oooo
+    `-__|__-'        8         8           8           8  8
+        |            8     o   8           8     o     8  8
+  ------+------       ooooo    8oooooo  ooo8ooo   ooooo   8
+
+Welcome to GNU CLISP 2.49+ (2010-07-17) <http://clisp.org/>
+
+Copyright (c) Bruno Haible, Michael Stoll 1992, 1993
+Copyright (c) Bruno Haible, Marcus Daniels 1994-1997
+Copyright (c) Bruno Haible, Pierpaolo Bernardi, Sam Steingold 1998
+Copyright (c) Bruno Haible, Sam Steingold 1999-2000
+Copyright (c) Sam Steingold, Bruno Haible 2001-2010
+
+Type :h and hit Enter for context help.
+
+[1]> ( load "three-card-flush.l" )
+;; Loading file three-card-flush.l ...
+;;  Loading file lp.l ...
+;;  Loaded file lp.l
+;; Loaded file three-card-flush.l
+#P"/cygdrive/e/SUNY Oswego/Fall22/AI/CSC416-Fall-2022/three-card-flush.l"
+[2]> ( demo--analyze-game )
+>>> Testing: analyze-game
+Game 1 ...
+*hand1* = ((JACK . HEART) (4 . DIAMOND) (2 . DIAMOND))
+*hand2* = ((KING . HEART) (QUEEN . HEART) (10 . SPADE))
+*game-state* = (BUST BUST)
+Game 2 ...
+*hand1* = ((JACK . DIAMOND) (10 . DIAMOND) (2 . DIAMOND))
+*hand2* = ((5 . SPADE) (4 . SPADE) (3 . SPADE))
+*game-state* = ((JACK HIGH DIAMOND FLUSH) (5 HIGH STRAIGHT SPADE FLUSH))
+NIL
+[3]>
+

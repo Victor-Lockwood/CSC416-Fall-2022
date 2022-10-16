@@ -474,3 +474,78 @@
       )
    )
 )
+
+; ------------------------------
+; PART 5
+; ------------------------------
+
+( defun analyze-game ()
+    ( setf *game-state* ( list ( analyze-hand *hand1* ) ( analyze-hand *hand2* ) ) )
+)
+
+( defun demo--analyze-game ()
+    ( format t ">>> Testing: analyze-game~%" )
+
+    ; a couple of busts
+    ( format t "Game 1 ... ~%" )
+    ( setf *hand1* '( ( 2 . diamond ) ( 4 . diamond ) ( jack . heart ) ) )
+    ( setf *hand2* '( ( 10 . spade ) ( king . heart ) ( queen . heart ) ) )
+    ( analyze-game )
+
+    ( format t "*hand1* = ~A~%" ( write-to-string *hand1* ) )
+    ( format t "*hand2* = ~A~%" *hand2* )
+    ( format t "*game-state* = ~A~%" *game-state* )
+
+    ; an ordinary flush and a straight flush
+    ( format t "Game 2 ... ~%" )
+    ( setf *hand1* '( ( 10 . diamond ) ( jack . diamond ) ( 2 . diamond ) ) )
+    ( setf *hand2* '( ( 3 . spade ) ( 5 . spade ) ( 4 . spade ) ) )
+    ( analyze-game )
+
+    ( format t "*hand1* = ~A~%" ( write-to-string *hand1* ) )
+    ( format t "*hand2* = ~A~%" *hand2* )
+    ( format t "*game-state* = ~A~%" *game-state* )
+
+    nil
+)
+
+( defun report-the-result ()
+    ( cond
+        ( ( equal *game-state* ’( bust bust ) )
+            ( format t "--> The game is a draw. The deck is dead.~%")
+        )
+
+        ( ( and ( not ( equal ( first *game-state* ) ’bust ) )
+            ( equal ( second *game-state* ) ’bust )
+          )
+            ( format t "--> Player 1 wins with ~A~%" ( first *game-state* ) )
+        )
+
+        ( ( and ( equal ( first *game-state* ) ’bust )
+            ( not ( equal ( second *game-state* ) ’bust ) )
+          )
+            ( format t "--> Player 2 wins with ~A~%" ( second *game-state* ) )
+        )
+
+        ( ( and ( straight-p *hand1* ) ( not ( straight-p *hand2* ) ) )
+            ( format t "!!! Both players found their way to a flush~%" )
+            ( format t "--> Player 1 wins with ~A~%" ( first *game-state* ) )
+        )
+
+        ( ( and ( not ( straight-p *hand1* ) ) ( straight-p *hand2* ) )
+            ( format t "!!! Both players found their way to a flush~%" )
+            ( format t "--> Player 2 wins with ~A~%" ( second *game-state* ) )
+        )
+
+        ( ( card-greater ( high-card *hand1* ) ( high-card *hand2* ) )
+            ( format t "!!! Both players found their way to a flush~%" )
+            ( format t "--> Player 1 wins with ~A~%" ( first *game-state* ) )
+        )
+
+        ( ( card-greater ( high-card *hand2* ) ( high-card *hand1* ) )
+            ( format t "!!! Both players found their way to a flush~%" )
+            ( format t "--> Player 2 wins with ~A~%" ( second *game-state* ) )
+        )
+    )
+    nil
+)
