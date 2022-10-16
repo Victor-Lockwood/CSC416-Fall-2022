@@ -185,7 +185,7 @@
 )
 
 ( defun players-each-take-a-turn () 
-    ( randomly-discard-cards )
+    ( randomly-heuristically-discard-cards )
     ( replace-cards )
 )
 
@@ -412,12 +412,13 @@
     nil
 )
 
+; Referenced: https://stackoverflow.com/questions/34032558/non-destructive-sort-in-lisp
 ( defun sort-cards-suit ( card-list ) 
-    ( sort card-list #'high-suit-p )
+    ( sort ( copy-seq card-list ) #'high-suit-p )
 )
 
 ( defun sort-cards-rank ( card-list ) 
-    ( sort card-list #'high-rank-p )
+    ( sort ( copy-seq card-list ) #'high-rank-p )
 )
 
 ( defun high-suit-p ( card1 card2 )
@@ -793,4 +794,84 @@
             ( play-game-n-times ( - n 1 ) )
         )
     )
+)
+
+; ------------------------------
+; PART 8
+; ------------------------------
+
+( defun randomly-heuristically-discard-cards ()
+    ( randomly-discard-card-from-hand1 )
+    ( heuristic-discard-card-from-hand2 )
+    nil
+)
+
+( defun heuristic-discard-card-from-hand2 ()
+    ( setf card1 ( first *hand2* ) )
+    ( setf card2 ( second *hand2* ) )
+    ( setf card3 ( third *hand2* ) )
+
+    ( setf low-card-of-hand ( low-card-for-discard *hand2* ) )
+
+    ( cond
+        ( ( equal ( cdr card1 ) ( cdr card2 ) )
+            ( setf ( nth 2 *hand2* ) () )
+            nil
+        )
+        ( ( equal ( cdr card1 ) ( cdr card3 ) )
+            ( setf ( nth 1 *hand2* ) () )
+            nil
+        )
+        ( ( equal ( cdr card2 ) ( cdr card3 ) )
+            ( setf ( nth 0 *hand2* ) () )
+            nil
+        )
+        ( ( equal low-card-of-hand card1 )
+            ( setf ( nth 0 *hand2* ) () )
+            nil
+        )
+        ( ( equal low-card-of-hand card1 )
+            ( setf ( nth 0 *hand2* ) () )
+            nil
+        )        
+        ( ( equal low-card-of-hand card2 )
+            ( setf ( nth 1 *hand2* ) () )
+            nil
+        )
+        ( ( equal low-card-of-hand card3 )
+            ( setf ( nth 2 *hand2* ) () )
+            nil
+        )
+    )
+)
+
+( defun demo--randomly-heuristically-discard-cards ()
+    ( format t ">>> Testing: randomly-heuristically-discard-cards~%" )
+    ( deal-hands )
+    ( format t "--- *hand1* = ~A~%" *hand1* )
+    ( format t "--- *hand2* = ~A~%" *hand2* )
+    ( randomly-heuristically-discard-cards )
+    ( format t "--- *hand1* = ~A~%" *hand1* )
+    ( format t "--- *hand2* = ~A~%" *hand2* )
+    nil
+)
+
+( defun low-card-for-discard ( hand )
+    ; Sort by suit first 
+    ( setf sorted-list-pass1 ( sort-cards-suit hand ) )
+
+    ; Grab the first card of the rank-sorted list
+    ( setf high-card-candidate ( car sorted-list-pass1 ) )
+
+    ; Get only the cards without that suit
+    ; Trying to use filter-out and coming up with a predicate was cumbersome, so I referred to this:
+    ; https://stackoverflow.com/questions/16223993/associative-list-in-lisp-get-all-entries-of-a-key-from
+    ( setf filtered-list ( remove-if ( lambda ( x ) ( eq ( cdr x ) ( cdr high-card-candidate ) ) ) sorted-list-pass1 ) )
+    
+    ; Sort the filtered list by rank
+    ( setf sorted-list-pass2 ( sort-cards-rank filtered-list ) )
+
+    ; Return the car of the final sorted list 
+    ( setf low-card-candidate ( rac filtered-list ) )
+    low-card-candidate
 )
