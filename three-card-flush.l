@@ -519,38 +519,49 @@
 ( defun report-the-result ()
     ( cond
         ( ( equal *game-state* '( bust bust ) )
+            ( increment '*draw-count* )
             ( format t "--> The game is a draw. The deck is dead.~%")
         )
 
         ( ( and ( not ( equal ( first *game-state* ) 'bust ) )
             ( equal ( second *game-state* ) 'bust )
           )
+            ( increment '*win1-count* )
             ( format t "--> Player 1 wins with ~A~%" ( first *game-state* ) )
         )
 
         ( ( and ( equal ( first *game-state* ) 'bust )
             ( not ( equal ( second *game-state* ) 'bust ) )
           )
+            ( increment '*win2-count* )
             ( format t "--> Player 2 wins with ~A~%" ( second *game-state* ) )
         )
 
         ( ( and ( straight-p *hand1* ) ( not ( straight-p *hand2* ) ) )
             ( format t "!!! Both players found their way to a flush~%" )
+            ( increment '*win1-count* )
+            ( increment '*f1f2-count* )
             ( format t "--> Player 1 wins with ~A~%" ( first *game-state* ) )
         )
 
         ( ( and ( not ( straight-p *hand1* ) ) ( straight-p *hand2* ) )
             ( format t "!!! Both players found their way to a flush~%" )
+            ( increment '*win2-count* )
+            ( increment '*f1f2-count* )
             ( format t "--> Player 2 wins with ~A~%" ( second *game-state* ) )
         )
 
         ( ( card-greater ( high-card *hand1* ) ( high-card *hand2* ) )
             ( format t "!!! Both players found their way to a flush~%" )
+            ( increment '*win1-count* )
+            ( increment '*f1f2-count* )
             ( format t "--> Player 1 wins with ~A~%" ( first *game-state* ) )
         )
 
         ( ( card-greater ( high-card *hand2* ) ( high-card *hand1* ) )
             ( format t "!!! Both players found their way to a flush~%" )
+            ( increment '*win1-count* )
+            ( increment '*f1f2-count* )
             ( format t "--> Player 2 wins with ~A~%" ( second *game-state* ) )
         )
     )
@@ -668,6 +679,9 @@
     ( format t "~A ~A~%" ( hand-rep *hand1* ) ( hand-rep *hand2* ) )
     ( if ( not ( game-over-p ) )
         ( let ()
+            ; Specs said to put this as the first line but I can't bring myself to
+            ; Otherwise we get 1 more than the actual number of turns played
+            ( increment '*turn-count* )
             ( players-each-take-a-turn )
             ( make-moves )
         )
@@ -730,3 +744,53 @@
    )
 )
 
+
+; ------------------------------
+; PART 7
+; ------------------------------
+
+; Counter initialization -- initialize once so the game can be played regardless of
+; whether or not statistics are being computed
+( defun init-counters ()
+    ( setf *win1-count* 0 )
+    ( setf *win2-count* 0 )
+    ( setf *draw-count* 0 )
+    ( setf *turn-count* 0 )
+    ( setf *f1f2-count* 0 )
+    ( setf *game-count* 0 )
+    nil
+)
+
+( init-counters )
+
+; Flexible counter incrementation
+( defun increment (name)
+    ( set name ( + ( eval name ) 1 ) )
+    nil
+)
+
+; The main statistics computation program
+( defun compute-statistics ( n )
+    ( init-counters )
+    ( play-game-n-times n )
+    ( format t "*game-count* = ~A~%" *game-count* )
+    ( format t "*turn-count* = ~A~%" *turn-count* )
+    ( format t "*win1-count* = ~A~%" *win1-count* )
+    ( format t "*win2-count* = ~A~%" *win2-count* )
+    ( format t "*draw-count* = ~A~%" *draw-count* )
+    ( format t "*f1f2-count* = ~A~%" *f1f2-count* )
+    nil
+)
+
+; Program to play the game n times
+( defun play-game-n-times ( n )
+    ( cond
+        ( ( > n 0 )
+            ; Specs said to put this as the first line but I can't bring myself to
+            ; Otherwise we get 1 more than the actual number of games played
+            ( increment '*game-count* )
+            ( play-game )
+            ( play-game-n-times ( - n 1 ) )
+        )
+    )
+)
