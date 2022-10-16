@@ -216,6 +216,177 @@
     ( format t "--- Each player takes a turn ...~%" )
     ( format t "--- *hand1* = ~A~%" *hand1* )
     ( format t "--- *hand2* = ~A~%" *hand2* )
-    
+
     nil
+)
+
+; ------------------------------
+; PART 4
+; ------------------------------
+
+; Modified some Racket code I wrote in CSC344 in order to define helper functions
+; Applicable file "classifier_ur.rkt" can be found in my github repo here:
+; https://github.com/Victor-Lockwood/CSC344-Fall-2022
+
+; Code from prior assignments in this class were also used.
+
+( defun flush-p ( hand )
+    ( setf check-list ( mapcar #'cdr hand ) )
+    ( uniform-p check-list )
+)
+
+( defun uniform-p ( l )
+    ( cond 
+        ( ( null l ) t )
+
+        ( ( = ( length l ) 1 ) t )
+
+        ( ( equal ( car l ) ( cadr l ) ) 
+            ( uniform-p ( cdr l ) )
+        )
+
+        ( t nil )
+    )
+)
+
+( defun demo--flush-p ( &aux hand )
+    ( format t ">>> Testing: flush-p~%" )
+    ( setf hand '( ( 2 . club ) ( ace . club ) ( 10 . club ) ) )
+    ( format t "~A " hand )
+    ( if ( flush-p hand )
+        ( format t "is a flush~%" )
+        ( format t "is not a flush~%" )
+    )
+
+    ( setf hand '( ( jack . diamond ) ( 9 . diamond ) ( 5 . diamond ) ) )
+    ( format t "~A " hand )
+    ( if ( flush-p hand )
+        ( format t "is a flush~%" )
+        ( format t "is not a flush~%" )
+    )
+
+    ( setf hand '( ( jack . heart ) ( 10 . heart ) ( 9 . heart ) ) )
+    ( format t "~A " hand )
+    ( if ( flush-p hand )
+        ( format t "is a flush~%" )
+        ( format t "is not a flush~%" )
+    )
+
+    ( setf hand '( ( 2 . spade) ( 3 . spade ) ( ace . spade ) ) )
+    ( format t "~A " hand )
+    ( if ( flush-p hand )
+        ( format t "is a flush~%" )
+        ( format t "is not a flush~%" )
+    )
+
+    ( setf hand '( ( 10 . spade) ( 5 . diamond ) ( ace . spade ) ) )
+    ( format t "~A " hand )
+    ( if ( flush-p hand )
+        ( format t "is a flush~%" )
+        ( format t "is not a flush~%" )
+    )
+
+    ( setf hand '( ( 8 . club) ( 9 . diamond ) ( 10 . heart ) ) )
+    ( format t "~A " hand )
+    ( if ( flush-p hand )
+        ( format t "is a flush~%" )
+        ( format t "is not a flush~%" )
+    )
+)
+
+( defun high-card ( hand )
+    ; Sort by rank first 
+    ( setf sorted-list-pass1 ( sort-cards-rank hand ) )
+
+    ; Grab the first card of the rank-sorted list
+    ( setf high-card-candidate ( car sorted-list-pass1 ) )
+
+    ; Get only the cards with that rank
+    ; Trying to use filter-in and coming up with a predicate was cumbersome, so I referred to this:
+    ; https://stackoverflow.com/questions/16223993/associative-list-in-lisp-get-all-entries-of-a-key-from
+    ( setf filtered-list ( remove-if-not ( lambda ( x ) ( eq ( car x ) ( car high-card-candidate ) ) ) sorted-list-pass1 ) )
+    
+    ; Sort the filtered list by suit
+    ( setf sorted-list-pass2 ( sort-cards-suit filtered-list ) )
+
+    ; Return the car of the final sorted list 
+    ( setf high-card-candidate ( car filtered-list ) )
+    high-card-candidate
+)
+
+( defun demo--high-card ()
+    ( format t ">>> Testing: high-card~%" )
+    ( setf hand '( ( 10 . heart ) ( 5 . club ) ( queen . spade ) ( 7 . heart ) ) )
+    ( format t "~A is the high card of~% ~A~%" ( high-card hand ) hand )
+
+    ( setf hand '( ( 2 . diamond ) ( 2 . club ) ( 10 . heart ) ( 4 . diamond ) ( ace . club ) ) )
+    ( format t "~A is the high card of~% ~A~%" ( high-card hand ) hand )
+
+    ( setf hand '( ( ace . diamond ) ( ace . club ) ( 5 . spade ) ) )
+    ( format t "~A is the high card of~% ~A~%" ( high-card hand ) hand )
+
+    nil
+)
+
+( defun sort-cards-suit ( card-list ) 
+    ( sort card-list #'high-suit-p )
+)
+
+( defun sort-cards-rank ( card-list ) 
+    ( sort card-list #'high-rank-p )
+)
+
+( defun high-suit-p ( card1 card2 )
+   ( setf suit1 ( cdr card1 ) )
+   ( setf suit2 ( cdr card2 ) )
+   ( setf number-val1 ( get-number-value-suit suit1 ) )
+   ( setf number-val2 ( get-number-value-suit suit2 ) )
+   
+   ( > number-val1 number-val2 )
+)
+
+( defun high-rank-p ( card1 card2 )
+   ( setf rank1 ( car card1 ) )
+   ( setf rank2 ( car card2 ) )
+   ( setf number-val1 ( get-number-value-rank rank1 ) )
+   ( setf number-val2 ( get-number-value-rank rank2 ) )
+   
+   ( > number-val1 number-val2 )
+)
+
+( defun get-number-value-suit ( input ) 
+   ( cond
+      ( ( eq input 'CLUB )
+        1
+      )
+      ( ( eq input 'DIAMOND )
+        2
+      )
+      ( ( eq input 'HEART )
+        3
+      )
+      ( ( eq input 'SPADE )
+        4
+      )
+   )
+)
+
+( defun get-number-value-rank ( input ) 
+   ( cond
+      ( ( numberp input )
+        input
+      )
+      ( ( eq input 'JACK )
+        11
+      )
+      ( ( eq input 'QUEEN )
+        12
+      )
+      ( ( eq input 'KING )
+        13
+      )
+      ( ( eq input 'ACE )
+        14
+      )
+   )
 )
