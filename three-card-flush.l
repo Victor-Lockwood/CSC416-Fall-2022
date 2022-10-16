@@ -509,20 +509,27 @@
     nil
 )
 
+( defun card-greater ( card1 card2 ) 
+    ( setf card-list ( list card1 card2 ) )
+    ( setf winning-card ( high-card card-list ) )
+
+    ( if ( equal card1 winning-card ) t nil )
+)
+
 ( defun report-the-result ()
     ( cond
-        ( ( equal *game-state* ’( bust bust ) )
+        ( ( equal *game-state* '( bust bust ) )
             ( format t "--> The game is a draw. The deck is dead.~%")
         )
 
-        ( ( and ( not ( equal ( first *game-state* ) ’bust ) )
-            ( equal ( second *game-state* ) ’bust )
+        ( ( and ( not ( equal ( first *game-state* ) 'bust ) )
+            ( equal ( second *game-state* ) 'bust )
           )
             ( format t "--> Player 1 wins with ~A~%" ( first *game-state* ) )
         )
 
-        ( ( and ( equal ( first *game-state* ) ’bust )
-            ( not ( equal ( second *game-state* ) ’bust ) )
+        ( ( and ( equal ( first *game-state* ) 'bust )
+            ( not ( equal ( second *game-state* ) 'bust ) )
           )
             ( format t "--> Player 2 wins with ~A~%" ( second *game-state* ) )
         )
@@ -547,5 +554,77 @@
             ( format t "--> Player 2 wins with ~A~%" ( second *game-state* ) )
         )
     )
+    nil
+)
+
+( defun demo--report-the-result() 
+    ( format t ">>> Testing: report-the-result~%" )
+
+    ; Bust all around
+    ( format t "Game 1 ... ~%" )
+    ( setf *hand1* '( ( 2 . diamond ) ( 4 . diamond ) ( jack . heart ) ) )
+    ( setf *hand2* '( ( 10 . spade ) ( king . heart ) ( queen . heart ) ) )
+    ( analyze-game )
+    ( format t "*hand1* = ~A~%" ( write-to-string *hand1* ) )
+    ( format t "*hand2* = ~A~%" *hand2* )
+    ( format t "*game-state* = ~A~%" *game-state* )
+    ( report-the-result )
+
+    ; Both flush, player 2 has a straight
+    ( format t "Game 2 ... ~%" )
+    ( setf *hand1* '( ( 10 . diamond ) ( jack . diamond ) ( 2 . diamond ) ) )
+    ( setf *hand2* '( ( 3 . spade ) ( 5 . spade ) ( 4 . spade ) ) )
+    ( analyze-game )
+    ( format t "*hand1* = ~A~%" ( write-to-string *hand1* ) )
+    ( format t "*hand2* = ~A~%" *hand2* )    
+    ( report-the-result )
+
+    ; Both flush, player 1 has a straight
+    ( format t "Game 3 ... ~%" )
+    ( setf *hand1* '( ( 3 . spade ) ( 5 . spade ) ( 4 . spade ) ) )
+    ( setf *hand2* '( ( 10 . diamond ) ( jack . diamond ) ( 2 . diamond ) ) )
+    ( analyze-game )
+    ( format t "*hand1* = ~A~%" ( write-to-string *hand1* ) )
+    ( format t "*hand2* = ~A~%" *hand2* )    
+    ( report-the-result )
+
+    ; Player 2 has a flush
+    ( format t "Game 4 ... ~%" )
+    ( setf *hand1* '( ( 2 . diamond ) ( 4 . diamond ) ( jack . heart ) ) )
+    ( setf *hand2* '( ( 10 . diamond ) ( jack . diamond ) ( 2 . diamond ) ) )
+    ( analyze-game )
+    ( format t "*hand1* = ~A~%" ( write-to-string *hand1* ) )
+    ( format t "*hand2* = ~A~%" *hand2* )
+    ( format t "*game-state* = ~A~%" *game-state* )
+    ( report-the-result )
+
+    ; Player 1 has a flush
+    ( format t "Game 5 ... ~%" )
+    ( setf *hand1* '( ( 10 . diamond ) ( jack . diamond ) ( 2 . diamond ) ) )
+    ( setf *hand2* '( ( 2 . diamond ) ( 4 . diamond ) ( jack . heart ) ) )
+    ( analyze-game )
+    ( format t "*hand1* = ~A~%" ( write-to-string *hand1* ) )
+    ( format t "*hand2* = ~A~%" *hand2* )
+    ( format t "*game-state* = ~A~%" *game-state* )
+    ( report-the-result )
+
+    ; Both flush and straight, player 2 has a higher suit
+    ( format t "Game 6 ... ~%" )
+    ( setf *hand1* '( ( 3 . diamond ) ( 5 . diamond ) ( 4 . diamond ) ) )
+    ( setf *hand2* '( ( 3 . spade ) ( 5 . spade ) ( 4 . spade ) ) )
+    ( analyze-game )
+    ( format t "*hand1* = ~A~%" ( write-to-string *hand1* ) )
+    ( format t "*hand2* = ~A~%" *hand2* )    
+    ( report-the-result )
+
+    ; Both flush and straight, player 1 has a higher suit
+    ( format t "Game 7 ... ~%" )
+    ( setf *hand1* '( ( 3 . diamond ) ( 5 . diamond ) ( 4 . diamond ) ) )
+    ( setf *hand2* '( ( 3 . club ) ( 5 . club ) ( 4 . club ) ) )
+    ( analyze-game )
+    ( format t "*hand1* = ~A~%" ( write-to-string *hand1* ) )
+    ( format t "*hand2* = ~A~%" *hand2* )    
+    ( report-the-result )
+
     nil
 )
