@@ -46,6 +46,18 @@
     ( format t "MISSIONARIES: ~A    CANNIBALS: ~A   BOAT=~A~%" ( bank-missionaries b ) ( bank-cannibals b ) ( bank-boat b ) )
 )
 
+;-----------------------------------
+; Checks if banks are equal 
+
+( defmethod equal-bank-p ( ( b1 bank ) ( b2 bank ) )
+    ( and 
+        ( equal ( bank-missionaries b1 ) ( bank-missionaries b2 ) )
+        ( equal ( bank-cannibals b1 ) ( bank-cannibals b2 ) )
+        ( equal ( bank-boat b1 ) ( bank-boat b2 ) )
+    )
+)
+
+
 ;------------------------------------------------------------------
 ; MODELLING A STATE
 
@@ -112,6 +124,16 @@
     )
 )
 
+;-----------------------------------
+; Checks if states are equal 
+
+( defmethod equal-state-p ( ( s1 state ) ( s2 state ) )
+    ( and 
+        ( equal-bank-p ( state-right-bank s1 ) ( state-right-bank s2 ) )
+        ( equal-bank-p ( state-left-bank s1 ) ( state-left-bank s2 ) )
+    )
+)
+
 ;------------------------------------------------------------------
 ; MODELLING A NODE
 
@@ -151,6 +173,17 @@
     ( eq ( node-name n ) 'root )
 )
 
+;-----------------------------------
+; Checks if node has been explored
+
+( defmethod exploredp ( ( n node ) )
+    ( member n *explored* :test #'equal-node-p )
+)
+
+( defmethod equal-node-p ( ( n1 node ) ( n2 node ) ) 
+    ( equal-state-p ( node-state n1 ) ( node-state n2 ) )
+)
+
 ;---------------------------------------------------------------------------------
 ; MODELING A STATE SPACE OPERATOR
 
@@ -166,7 +199,8 @@
 ; METHOD TO ESTABLISH THE 8 STATE SPACE OPERATORS AND ENCAPSULATE THEM IN A LIST
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; The following global variables are bound when establish-operatores is run:
-; *move-1c*, *move-2c*, *move-1m*, *move-2m*, *move-1m-1c*
+; *move-c-lr*, *move-cc-lr*, *move-m-lr*, *move-mm-lr*, *move-cm-lr*,
+; *move-c-rl*, *move-cc-rl*, *move-m-rl*, *move-mm-rl*, *move-cm-rl*
 
 ( defmethod establish-operators ()
     ; LEFT BANK TO RIGHT BANK
@@ -312,10 +346,6 @@
         )
     )
     nil
-)
-
-( defmethod exploredp ( ( s state ) )
-    ;### best to use member with two key word args -- :key and :test
 )
 
 ;------------------------------------------------------------------
