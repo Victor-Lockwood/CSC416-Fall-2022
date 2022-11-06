@@ -46,6 +46,55 @@
     ( format t "MISSIONARIES: ~A    CANNIBALS: ~A   BOAT=~A~%" ( bank-missionaries b ) ( bank-cannibals b ) ( bank-boat b ) )
 )
 
+
+;-----------------------------------
+; Move methods
+
+( defmethod move-boat ( ( from-bank bank ) ( to-bank bank) )
+    ( setf ( bank-boat from-bank ) nil )
+    ( setf ( bank-boat to-bank ) 'B )
+
+    nil
+)
+
+( defmethod move-c ( ( from-bank bank ) ( to-bank bank) )
+    ( pop ( bank-cannibals from-bank ) ) 
+    ( push 'C ( bank-cannibals to-bank ) ) 
+
+    nil
+)
+
+( defmethod move-cc ( ( from-bank bank ) ( to-bank bank) )
+    ( move-c from-bank to-bank )
+    ( move-c from-bank to-bank )
+
+    nil
+)
+
+( defmethod move-m ( ( from-bank bank ) ( to-bank bank) )
+    ( pop ( bank-missionaries from-bank ) ) 
+    ( push 'M ( bank-missionaries to-bank ) ) 
+
+    ( setf ( bank-boat from-bank ) nil )
+    ( setf ( bank-boat to-bank ) 'B )
+
+    nil
+)
+
+( defmethod move-mm ( ( from-bank bank ) ( to-bank bank) )
+    ( move-m from-bank to-bank )
+    ( move-m from-bank to-bank )
+
+    nil
+)
+
+( defmethod move-cm ( ( from-bank bank ) ( to-bank bank) )
+    ( move-c from-bank to-bank )
+    ( move-m from-bank to-bank )
+
+    nil
+)
+
 ;-----------------------------------
 ; Checks if banks are equal 
 
@@ -72,6 +121,10 @@
     ( display ( state-left-bank s ) )
     ( display ( state-right-bank s ) )
     nil
+)
+
+( defmethod copy-state ( ( s state ) ) 
+    ( make-instance 'state :left-bank ( state-left-bank s ) :right-bank ( state-right-bank s ) )
 )
 
 ;-----------------------------------
@@ -134,6 +187,104 @@
     )
 )
 
+;-----------------------------------
+; Checks applicability of an operator 
+
+; LEFT BANK TO RIGHT BANK
+( defmethod applicable-move-c-lr ( ( s state ) )
+    ( setf lb ( state-left-bank s ) )
+
+    ( and
+        ( member 'C ( bank-cannibals lb ) )
+        ( equal 'B ( bank-boat lb ) )
+    )
+)
+
+( defmethod applicable-move-cc-lr ( ( s state) )
+    ( setf lb ( state-left-bank s ) )
+
+    ( and
+        ( >= ( count 'C ( bank-cannibals lb ) ) 2 )
+        ( equal 'B ( bank-boat lb ) )
+    )
+)
+
+( defmethod applicable-move-m-lr ( ( s state) )
+    ( setf lb ( state-left-bank s ) )
+
+    ( and
+        ( member 'M ( bank-missionaries lb ) )
+        ( equal 'B ( bank-boat lb ) )
+    )
+)
+
+( defmethod applicable-move-mm-lr ( ( s state) )
+    ( setf lb ( state-left-bank s ) )
+
+    ( and
+        ( >= ( count 'M ( bank-missionaries lb ) ) 2 )
+        ( equal 'B ( bank-boat lb ) )
+    )
+)
+
+( defmethod applicable-move-cm-lr ( ( s state) )
+    ( setf lb ( state-left-bank s ) )
+
+    ( and
+        ( member 'M ( bank-missionaries lb ) )
+        ( member 'M ( bank-missionaries lb ) )
+        ( equal 'B ( bank-boat lb ) )
+    )
+)
+
+; RIGHT BANK TO LEFT BANK
+( defmethod applicable-move-c-rl ( ( s state) )
+    ( setf rb ( state-right-bank s ) )
+
+    ( and
+        ( member 'C ( bank-cannibals rb ) )
+        ( equal 'B ( bank-boat rb ) )
+    )
+)
+
+( defmethod applicable-move-cc-rl ( ( s state) )
+    ( setf rb ( state-right-bank s ) )
+
+    ( and
+        ( >= ( count 'C ( bank-cannibals rb ) ) 2 )
+        ( equal 'B ( bank-boat rb ) )
+    )
+)
+
+( defmethod applicable-move-m-rl ( ( s state) )
+    ( setf rb ( state-right-bank s ) )
+
+    ( and
+        ( member 'M ( bank-missionaries rb ) )
+        ( equal 'B ( bank-boat rb ) )
+    )
+)
+
+( defmethod applicable-move-mm-rl ( ( s state) )
+    ( setf rb ( state-right-bank s ) )
+
+    ( and
+        ( >= ( count 'M ( bank-missionaries rb ) ) 2 )
+        ( equal 'B ( bank-boat rb ) )
+    )
+)
+
+( defmethod applicable-move-cm-rl ( ( s state) )
+    ( setf rb ( state-right-bank s ) )
+
+    ( and
+        ( member 'M ( bank-missionaries rb ) )
+        ( member 'M ( bank-missionaries rb ) )
+        ( equal 'B ( bank-boat rb ) )
+    )
+)
+
+
 ;------------------------------------------------------------------
 ; MODELLING A NODE
 
@@ -176,13 +327,57 @@
 ;-----------------------------------
 ; Checks if node has been explored
 
-( defmethod exploredp ( ( n node ) )
-    ( member n *explored* :test #'equal-node-p )
+( defmethod exploredp ( ( s state ) )
+    ( setf explored-states ( mapcar #'node-state *explored* ) )
+    ( member s explored-states :test #'equal-state-p )
 )
 
 ( defmethod equal-node-p ( ( n1 node ) ( n2 node ) ) 
     ( equal-state-p ( node-state n1 ) ( node-state n2 ) )
 )
+
+;-----------------------------------
+; Checks if operator is applicable 
+
+( defmethod applicablep ( ( op operator ) ( n node ) )
+    ( cond 
+        ; LEFT BANK TO RIGHT BANK
+        ( ( eq ( operator-name op ) 'move-c-lr )
+            ( applicable-move-c-lr ( node-state n ) )
+        )
+        ( ( eq ( operator-name op ) 'move-cc-lr )
+            ( applicable-move-cc-lr ( node-state n ) )
+        )
+        ( ( eq ( operator-name op ) 'move-m-lr )
+            ( applicable-move-m-lr ( node-state n ) )
+        )
+        ( ( eq ( operator-name op ) 'move-mm-lr )
+            ( applicable-move-mm-lr ( node-state n ) )
+        )
+        ( ( eq ( operator-name op ) 'move-cm-lr )
+            ( applicable-move-cm-lr ( node-state n ) )
+        )
+
+        ; RIGHT BANK TO LEFT BANK
+        ( ( eq ( operator-name op ) 'move-c-rl )
+            ( applicable-move-c-rl ( node-state n ) )
+        )
+        ( ( eq ( operator-name op ) 'move-cc-rl )
+            ( applicable-move-cc-rl ( node-state n ) )
+        )
+        ( ( eq ( operator-name op ) 'move-m-rl )
+            ( applicable-move-m-rl ( node-state n ) )
+        )
+        ( ( eq ( operator-name op ) 'move-mm-rl )
+            ( applicable-move-mm-rl ( node-state n ) )
+        )
+        ( ( eq ( operator-name op ) 'move-cm-rl )
+            ( applicable-move-cm-rl ( node-state n ) )
+        )
+    )
+)
+
+
 
 ;---------------------------------------------------------------------------------
 ; MODELING A STATE SPACE OPERATOR
@@ -193,6 +388,10 @@
         ( precondition :accessor operator-precondition :initarg :precondition )
         ( description :accessor operator-description :initarg :description )
     )
+)
+
+( defmethod display ( ( o operator ) )
+    ( format t "~A " ( operator-name o ) )
 )
 
 ;---------------------------------------------------------------------------------
@@ -369,7 +568,48 @@
 ; GENERATING CHILDREN
 
 ( defmethod children-of ( ( e-node node ) &aux kids ) 
-    ;###
+    ; LEFT BANK TO RIGHT BANK
+    ( if ( applicablep *move-c-lr* e-node ) 
+        ( push ( child-of e-node *move-c-lr* ) kids )
+    )
+
+    ( if ( applicablep *move-cc-lr* e-node ) 
+        ( push ( child-of e-node *move-cc-lr* ) kids )
+    )
+
+    ( if ( applicablep *move-m-lr* e-node ) 
+        ( push ( child-of e-node *move-m-lr* ) kids )
+    )
+
+    ( if ( applicablep *move-mm-lr* e-node ) 
+        ( push ( child-of e-node *move-mm-lr* ) kids )
+    )
+
+    ( if ( applicablep *move-cm-lr* e-node ) 
+        ( push ( child-of e-node *move-cm-lr* ) kids )
+    )
+
+    ; RIGHT BANK TO LEFT BANK
+    ( if ( applicablep *move-c-rl* e-node ) 
+        ( push ( child-of e-node *move-c-rl* ) kids )
+    )
+
+    ( if ( applicablep *move-cc-rl* e-node ) 
+        ( push ( child-of e-node *move-cc-rl* ) kids )
+    )
+    
+    ( if ( applicablep *move-m-rl* e-node ) 
+        ( push ( child-of e-node *move-m-rl* ) kids )
+    )
+
+    ( if ( applicablep *move-mm-rl* e-node ) 
+        ( push ( child-of e-node *move-mm-rl* ) kids )
+    )
+
+    ( if ( applicablep *move-cm-rl* e-node ) 
+        ( push ( child-of e-node *move-cm-rl* ) kids )
+    )
+    kids
 )
 
 ( defmethod child-of ( ( n node ) ( o operator ) &aux c )
@@ -377,10 +617,60 @@
     ( setf ( node-name new-node ) ( next *ng* ) )
     ( setf ( node-parent new-node ) n )
     ( setf ( node-operator new-node ) o )
-    ( setf c ( copy-state (node-state n ) ) )
+    ( setf c ( copy-state ( node-state n ) ) )
     ( apply-operator o c )
     ( setf ( node-state new-node ) c )
     new-node
+)
+
+( defmethod apply-operator ( ( op operator ) ( s state ) )
+    ( setf lb ( state-left-bank s ) )
+    ( setf rb ( state-right-bank s ) )
+    ( cond 
+        ; LEFT BANK TO RIGHT BANK
+        ( ( eq ( operator-name op ) 'move-c-lr )
+            ( move-c lb rb )
+            ( move-boat lb rb )
+        )
+        ( ( eq ( operator-name op ) 'move-cc-lr )
+            ( move-cc lb rb )
+            ( move-boat lb rb )
+        )
+        ( ( eq ( operator-name op ) 'move-m-lr )
+            ( move-m lb rb )
+            ( move-boat lb rb )
+        )
+        ( ( eq ( operator-name op ) 'move-mm-lr )
+            ( move-mm lb rb )
+            ( move-boat lb rb )
+        )
+        ( ( eq ( operator-name op ) 'move-cm-lr )
+            ( move-cm lb rb )
+            ( move-boat lb rb )
+        )
+
+        ; RIGHT BANK TO LEFT BANK
+        ( ( eq ( operator-name op ) 'move-c-rl )
+            ( move-c rb lb )
+            ( move-boat rb lb )
+        )
+        ( ( eq ( operator-name op ) 'move-cc-rl )
+            ( move-cc rb lb )
+            ( move-boat rb lb )
+        )
+        ( ( eq ( operator-name op ) 'move-m-rl )
+            ( move-m rb lb )
+            ( move-boat rb lb )
+        )
+        ( ( eq ( operator-name op ) 'move-mm-rl )
+            ( move-mm rb lb )
+            ( move-boat rb lb )
+        )
+        ( ( eq ( operator-name op ) 'move-cm-rl )
+            ( move-cm rb lb )
+            ( move-boat rb lb )
+        )
+    )
 )
 
 ;------------------------------------------------------------------
