@@ -42,6 +42,10 @@
     )
 )
 
+( defmethod display ( ( b bank ) ) 
+    ( format t "MISSIONARIES: ~A    CANNIBALS: ~A   BOAT=~A~%" ( bank-missionaries b ) ( bank-cannibals b ) ( bank-boat b ) )
+)
+
 ;------------------------------------------------------------------
 ; MODELLING A STATE
 
@@ -56,6 +60,56 @@
     ( display ( state-left-bank s ) )
     ( display ( state-right-bank s ) )
     nil
+)
+
+;-----------------------------------
+; Checks if state is a goal state 
+
+( defmethod goalp ( ( s state ) )
+    ( and 
+        ( leftbank-ok-p ( state-left-bank s ) )
+        ( rightbank-ok-p ( state-right-bank s ) )
+    )
+)
+
+( defmethod leftbank-ok-p ( ( lb bank ) )
+    ( and 
+        ( null ( bank-missionaries lb ) )
+        ( null ( bank-cannibals lb ) )
+        ( null ( bank-boat lb ) )
+    )
+)
+
+( defmethod rightbank-ok-p ( ( rb bank ) )
+    ( and 
+        ( equal '( M M M ) ( bank-missionaries rb ) )
+        ( equal '( C C C ) ( bank-cannibals rb ) )
+        ( equal 'B ( bank-boat rb ) )
+    )
+)
+
+;-----------------------------------
+; Checks if state is a feast state 
+
+( defmethod feast-state-p ( ( s state ) ) 
+    ( or
+        ( leftbank-feast-p ( state-left-bank s ) )
+        ( rightbank-feast-p ( state-right-bank s ) )
+    )
+)
+
+( defmethod leftbank-feast-p ( ( lb bank ) )
+    ( and 
+        ( member 'M ( bank-missionaries lb ) )
+        ( > ( count 'C ( bank-cannibals lb ) ) ( count 'M ( bank-missionaries lb ) ) )
+    )
+)
+
+( defmethod rightbank-feast-p ( ( rb bank ) )
+    ( and 
+        ( member 'M ( bank-missionaries rb ) )
+        ( > ( count 'C ( bank-cannibals rb ) ) ( count 'M ( bank-missionaries rb ) ) )
+    )
 )
 
 ;------------------------------------------------------------------
@@ -83,6 +137,20 @@
     nil
 )
 
+( defmethod display-the-e-node ( ( e-node node ) ) 
+    ( format t ">>> E-NODE~%" )
+    ( display e-node )
+    ( terpri )
+    nil
+)
+
+;-----------------------------------
+; Checks if node is a root node 
+
+( defmethod rootp ( ( n node ) )
+    ( eq ( node-name n ) 'root )
+)
+
 ;---------------------------------------------------------------------------------
 ; MODELING A STATE SPACE OPERATOR
 
@@ -101,39 +169,77 @@
 ; *move-1c*, *move-2c*, *move-1m*, *move-2m*, *move-1m-1c*
 
 ( defmethod establish-operators ()
-    ( setf *move-1c* 
+    ; LEFT BANK TO RIGHT BANK
+    ( setf *move-c-lr* 
         ( make-instance 'operator
-            :name 'move-1c 
-            :precondition "At least one cannibal is available to move"
-            :description "Move one cannibal to the other bank"
+            :name 'move-c-lr 
+            :precondition "At least one cannibal and the boat are available to move on the left bank"
+            :description "Move one cannibal and the boat to the right bank"
         )
     )
-    ( setf *move-2c* 
+    ( setf *move-cc-lr* 
         ( make-instance 'operator
-            :name 'move-2c
-            :precondition "At least two cannibals are available to move"
-            :description "Move two cannibals to the other bank"
+            :name 'move-cc-lr
+            :precondition "At least two cannibals and the boat are available to move on the left bank"
+            :description "Move two cannibals and the boat to the right bank"
         )
     )
-    ( setf *move-1m* 
+    ( setf *move-m-lr* 
         ( make-instance 'operator
-            :name 'move-1m
-            :precondition "At least one missionary is available to move"
-            :description "Move one missionary to the other bank"
+            :name 'move-m-lr
+            :precondition "At least one missionary and the boat are available to move on the left bank"
+            :description "Move one missionary and the boat to the right bank"
         )
     )
-    ( setf *move-2m* 
+    ( setf *move-mm-lr* 
         ( make-instance 'operator
-            :name 'move-2m
-            :precondition "At least two missionaries are available to move"
-            :description "Move two missionaries to the other bank"
+            :name 'move-mm-lr
+            :precondition "At least two missionaries and the boat are available to move on the left bank"
+            :description "Move two missionaries and the boat to the right bank"
         )
     )
-    ( setf *move-1m-1c* 
+    ( setf *move-cm-lr* 
         ( make-instance 'operator
-            :name 'move-1m-1c
-            :precondition "At least one missionary and one cannibal are available to move"
-            :description "Move one missionary and one cannibal to the other bank"
+            :name 'move-cm-lr
+            :precondition "At least one missionary, one cannibal and the boat are available to move on the left bank"
+            :description "Move one missionary, one cannibal and the boat to the right bank"
+        )
+    )
+
+    ; RIGHT BANK TO LEFT BANK
+    ( setf *move-c-rl* 
+        ( make-instance 'operator
+            :name 'move-c-rl 
+            :precondition "At least one cannibal and the boat are available to move on the right bank"
+            :description "Move one cannibal and the boat to the left bank"
+        )
+    )
+    ( setf *move-cc-rl* 
+        ( make-instance 'operator
+            :name 'move-cc-lr
+            :precondition "At least two cannibals and the boat are available to move on the right bank"
+            :description "Move two cannibals and the boat to the left bank"
+        )
+    )
+    ( setf *move-m-rl* 
+        ( make-instance 'operator
+            :name 'move-m-rl
+            :precondition "At least one missionary and the boat are available to move on the right bank"
+            :description "Move one missionary and the boat to the left bank"
+        )
+    )
+    ( setf *move-mm-rl* 
+        ( make-instance 'operator
+            :name 'move-mm-rl
+            :precondition "At least two missionaries and the boat are available to move on the right bank"
+            :description "Move two missionaries and the boat to the left bank"
+        )
+    )
+    ( setf *move-cm-rl* 
+        ( make-instance 'operator
+            :name 'move-cm-rl
+            :precondition "At least one missionary, one cannibal and the boat are available to move on the right bank"
+            :description "Move one missionary, one cannibal and the boat to the left bank"
         )
     )
     nil
@@ -147,6 +253,29 @@
     ( establish-operators )
     ( setup )
     ( solve )
+)
+
+( defmethod display-the-unexplored-list ()
+    ( format t "~%>>> UNEXPLORED LIST~%" )
+    ( display-unexplored-states )
+    nil
+)
+
+( defmethod display-unexplored-states ()
+    ( mapcar #'display *unexplored* )
+    nil
+)
+
+( defmethod display-the-explored-list ()
+    ( format t "~%>>> EXPLORED LIST~%" )
+    ( display-explored-states )
+    ( terpri )
+    nil
+)
+
+( defmethod display-explored-states ()
+    ( mapcar #'display *explored* )
+    nil
 )
 
 ;---------------------------------------------------------------------------------
