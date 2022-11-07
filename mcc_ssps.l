@@ -50,23 +50,25 @@
 ;-----------------------------------
 ; Move methods
 
-( defmethod move-boat ( ( from-bank bank ) ( to-bank bank) )
+( defmethod move-c ( ( from-bank bank ) ( to-bank bank) )
+    ( pop ( bank-cannibals from-bank ) ) 
+    ( push 'C ( bank-cannibals to-bank ) ) 
+
     ( setf ( bank-boat from-bank ) nil )
     ( setf ( bank-boat to-bank ) 'B )
 
     nil
 )
 
-( defmethod move-c ( ( from-bank bank ) ( to-bank bank) )
+( defmethod move-cc ( ( from-bank bank ) ( to-bank bank) )
     ( pop ( bank-cannibals from-bank ) ) 
     ( push 'C ( bank-cannibals to-bank ) ) 
 
-    nil
-)
+    ( pop ( bank-cannibals from-bank ) ) 
+    ( push 'C ( bank-cannibals to-bank ) ) 
 
-( defmethod move-cc ( ( from-bank bank ) ( to-bank bank) )
-    ( move-c from-bank to-bank )
-    ( move-c from-bank to-bank )
+    ( setf ( bank-boat from-bank ) nil )
+    ( setf ( bank-boat to-bank ) 'B )
 
     nil
 )
@@ -82,15 +84,27 @@
 )
 
 ( defmethod move-mm ( ( from-bank bank ) ( to-bank bank) )
-    ( move-m from-bank to-bank )
-    ( move-m from-bank to-bank )
+    ( pop ( bank-missionaries from-bank ) ) 
+    ( push 'M ( bank-missionaries to-bank ) ) 
+
+    ( pop ( bank-missionaries from-bank ) ) 
+    ( push 'M ( bank-missionaries to-bank ) ) 
+
+    ( setf ( bank-boat from-bank ) nil )
+    ( setf ( bank-boat to-bank ) 'B )
 
     nil
 )
 
 ( defmethod move-cm ( ( from-bank bank ) ( to-bank bank) )
-    ( move-c from-bank to-bank )
-    ( move-m from-bank to-bank )
+    ( pop ( bank-cannibals from-bank ) ) 
+    ( push 'C ( bank-cannibals to-bank ) ) 
+
+    ( pop ( bank-missionaries from-bank ) ) 
+    ( push 'M ( bank-missionaries to-bank ) ) 
+
+    ( setf ( bank-boat from-bank ) nil )
+    ( setf ( bank-boat to-bank ) 'B )
 
     nil
 )
@@ -124,8 +138,16 @@
 )
 
 ( defmethod copy-state ( ( s state ) ) 
-    ( make-instance 'state :left-bank ( state-left-bank s ) :right-bank ( state-right-bank s ) )
+    ( setf new-left-bank ( copy-bank ( state-left-bank s ) ) )
+    ( setf new-right-bank ( copy-bank ( state-right-bank s ) ) )
+    ( make-instance 'state :left-bank new-left-bank :right-bank new-right-bank )
 )
+
+( defmethod copy-bank ( ( b bank ) &aux new-boat )
+    ( setf new-boat nil )
+    ( if ( eq ( bank-boat b ) 'B ) ( setf new-boat nil ) )
+    ( make-instance 'bank :missionaries ( copy-list ( bank-missionaries b ) ) :cannibals ( copy-list ( bank-cannibals b ) ) :boat new-boat  )
+)   
 
 ;-----------------------------------
 ; Checks if state is a goal state 
@@ -238,7 +260,7 @@
 )
 
 ; RIGHT BANK TO LEFT BANK
-( defmethod applicable-move-c-rl ( ( s state) )
+( defmethod applicable-move-c-rl ( ( s state ) )
     ( setf rb ( state-right-bank s ) )
 
     ( and
@@ -336,6 +358,22 @@
     ( equal-state-p ( node-state n1 ) ( node-state n2 ) )
 )
 
+
+;---------------------------------------------------------------------------------
+; MODELING A STATE SPACE OPERATOR
+
+( defclass operator ()
+    (
+        ( name :accessor operator-name :initarg :name )
+        ( precondition :accessor operator-precondition :initarg :precondition )
+        ( description :accessor operator-description :initarg :description )
+    )
+)
+
+( defmethod display ( ( o operator ) )
+    ( format t "~A " ( operator-name o ) )
+)
+
 ;-----------------------------------
 ; Checks if operator is applicable 
 
@@ -375,23 +413,6 @@
             ( applicable-move-cm-rl ( node-state n ) )
         )
     )
-)
-
-
-
-;---------------------------------------------------------------------------------
-; MODELING A STATE SPACE OPERATOR
-
-( defclass operator ()
-    (
-        ( name :accessor operator-name :initarg :name )
-        ( precondition :accessor operator-precondition :initarg :precondition )
-        ( description :accessor operator-description :initarg :description )
-    )
-)
-
-( defmethod display ( ( o operator ) )
-    ( format t "~A " ( operator-name o ) )
 )
 
 ;---------------------------------------------------------------------------------
@@ -449,7 +470,7 @@
     )
     ( setf *move-cc-rl* 
         ( make-instance 'operator
-            :name 'move-cc-lr
+            :name 'move-cc-rl
             :precondition "At least two cannibals and the boat are available to move on the right bank"
             :description "Move two cannibals and the boat to the left bank"
         )
@@ -630,45 +651,35 @@
         ; LEFT BANK TO RIGHT BANK
         ( ( eq ( operator-name op ) 'move-c-lr )
             ( move-c lb rb )
-            ( move-boat lb rb )
         )
         ( ( eq ( operator-name op ) 'move-cc-lr )
             ( move-cc lb rb )
-            ( move-boat lb rb )
         )
         ( ( eq ( operator-name op ) 'move-m-lr )
             ( move-m lb rb )
-            ( move-boat lb rb )
         )
         ( ( eq ( operator-name op ) 'move-mm-lr )
             ( move-mm lb rb )
-            ( move-boat lb rb )
         )
         ( ( eq ( operator-name op ) 'move-cm-lr )
             ( move-cm lb rb )
-            ( move-boat lb rb )
         )
 
         ; RIGHT BANK TO LEFT BANK
         ( ( eq ( operator-name op ) 'move-c-rl )
             ( move-c rb lb )
-            ( move-boat rb lb )
         )
         ( ( eq ( operator-name op ) 'move-cc-rl )
             ( move-cc rb lb )
-            ( move-boat rb lb )
         )
         ( ( eq ( operator-name op ) 'move-m-rl )
             ( move-m rb lb )
-            ( move-boat rb lb )
         )
         ( ( eq ( operator-name op ) 'move-mm-rl )
             ( move-mm rb lb )
-            ( move-boat rb lb )
         )
         ( ( eq ( operator-name op ) 'move-cm-rl )
             ( move-cm rb lb )
-            ( move-boat rb lb )
         )
     )
 )
@@ -687,5 +698,20 @@
     ( concatenate 'string
         ( name-generator-prefix ng )
         ( write-to-string ( name-generator-nr ng ) )
+    )
+)
+
+;------------------------------------------------------------------
+; DISPLAY THE SOLUTION
+
+( defmethod display-solution ( ( n node ) ) 
+    ( cond
+        ( ( rootp n )
+            ( terpri )
+        )
+        ( t
+            ( display-solution ( node-parent n ) )
+            ( format t "Poop~%")
+        )
     )
 )
