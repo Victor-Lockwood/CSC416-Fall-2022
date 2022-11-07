@@ -428,35 +428,35 @@
         ( make-instance 'operator
             :name 'move-c-lr 
             :precondition "At least one cannibal and the boat are available to move on the left bank"
-            :description "Move one cannibal and the boat to the right bank"
+            :description "Move ( C B ) from left bank to right bank"
         )
     )
     ( setf *move-cc-lr* 
         ( make-instance 'operator
             :name 'move-cc-lr
             :precondition "At least two cannibals and the boat are available to move on the left bank"
-            :description "Move two cannibals and the boat to the right bank"
+            :description "Move ( C C B ) from left bank to right bank"
         )
     )
     ( setf *move-m-lr* 
         ( make-instance 'operator
             :name 'move-m-lr
             :precondition "At least one missionary and the boat are available to move on the left bank"
-            :description "Move one missionary and the boat to the right bank"
+            :description "Move ( M B ) from left bank to right bank"
         )
     )
     ( setf *move-mm-lr* 
         ( make-instance 'operator
             :name 'move-mm-lr
             :precondition "At least two missionaries and the boat are available to move on the left bank"
-            :description "Move two missionaries and the boat to the right bank"
+            :description "Move ( M M B ) to the right bank"
         )
     )
     ( setf *move-cm-lr* 
         ( make-instance 'operator
             :name 'move-cm-lr
             :precondition "At least one missionary, one cannibal and the boat are available to move on the left bank"
-            :description "Move one missionary, one cannibal and the boat to the right bank"
+            :description "Move ( C M B ) from left bank to right bank"
         )
     )
 
@@ -465,35 +465,35 @@
         ( make-instance 'operator
             :name 'move-c-rl 
             :precondition "At least one cannibal and the boat are available to move on the right bank"
-            :description "Move one cannibal and the boat to the left bank"
+            :description "Move ( C B ) from right bank to left bank"
         )
     )
     ( setf *move-cc-rl* 
         ( make-instance 'operator
             :name 'move-cc-rl
             :precondition "At least two cannibals and the boat are available to move on the right bank"
-            :description "Move two cannibals and the boat to the left bank"
+            :description "Move ( C C B ) from right bank to left bank"
         )
     )
     ( setf *move-m-rl* 
         ( make-instance 'operator
             :name 'move-m-rl
             :precondition "At least one missionary and the boat are available to move on the right bank"
-            :description "Move one missionary and the boat to the left bank"
+            :description "Move ( M B ) from right bank to left bank"
         )
     )
     ( setf *move-mm-rl* 
         ( make-instance 'operator
             :name 'move-mm-rl
             :precondition "At least two missionaries and the boat are available to move on the right bank"
-            :description "Move two missionaries and the boat to the left bank"
+            :description "Move ( M M B ) from right bank to left bank"
         )
     )
     ( setf *move-cm-rl* 
         ( make-instance 'operator
             :name 'move-cm-rl
             :precondition "At least one missionary, one cannibal and the boat are available to move on the right bank"
-            :description "Move one missionary, one cannibal and the boat to the left bank"
+            :description "Move ( M B ) from right bank to left bank"
         )
     )
     nil
@@ -711,7 +711,7 @@
         )
         ( t
             ( display-solution ( node-parent n ) )
-            ( format t "Poop~%")
+            ( format t "~A~%" ( operator-description ( node-operator n ) ) )
         )
     )
 )
