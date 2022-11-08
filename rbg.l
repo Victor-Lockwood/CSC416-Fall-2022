@@ -62,3 +62,42 @@
     ( setf ( nth position mutated-list ) el )
     mutated-list
 )
+
+;--------------------
+; Crossover two strings
+
+( defmethod crossover ( ( m list ) ( f list ) &aux pos)
+    ( setf pos ( + 1 ( random ( length m ) ) ) )
+    ( append ( first-n m pos ) ( rest-n f pos ) )
+)
+
+( defmethod first-n ( ( input-list list ) position )
+    ( setf return-list () )
+    
+    ( cond
+        ( ( = position 1 )
+            ( setf return-list ( snoc ( car input-list ) return-list ) )
+            return-list
+        )
+        (
+            ( setf candidate ( nth (- position 1 ) input-list ) )
+            ( setf return-list ( snoc candidate ( first-n input-list ( - position 1 )  ) ) )
+            return-list
+        )
+    )
+)
+
+( defmethod rest-n ( ( input-list list ) position )
+    ( setf return-list () )
+    
+    ( cond
+        ( ( = position ( length input-list ) )
+            return-list
+        )
+        (
+            ( setf candidate ( nth position input-list ) )
+            ( setf return-list ( cons candidate ( rest-n input-list ( + position 1 ) ) ) )
+            return-list
+        )
+    )
+)
