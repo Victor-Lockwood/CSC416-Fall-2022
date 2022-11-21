@@ -243,3 +243,102 @@
     ( format t "Fitness of i3 = ~A~%" ( funcall *fitness* i3 ) )
     nil
 )
+
+;--------------------
+; Population class
+
+( defconstant *population-size* 100 )
+( defconstant *selection-size* 8 )
+( setf *fitness* #'fitness-b)
+
+( defclass population ()
+    (
+        ( individuals :accessor population-individuals :initarg :individuals )
+        ( generation :accessor population-generation :initform 0 )
+    )
+)
+
+( defmethod i-size ( ( p population ) )
+    ( length ( population-individuals p ) )
+)
+
+( defmethod display ( ( p population ) )
+    ( terpri ) ( terpri )
+    ( princ "Generation " )
+    ( prin1 ( population-generation p ) )
+    ( princ " population ..." )
+    ( terpri ) ( terpri )
+
+    ( dolist ( i ( population-individuals p ) )
+        ( display i )
+    )
+
+    ( terpri )
+)
+
+( defmethod initial-population ( &aux individuals )
+    ( setf individuals () )
+    ( dotimes ( i *population-size* ) 
+        ( push ( new-individual ( + i 1 ) ( rbg-string ) ) individuals )
+    )
+    ( make-instance 'population :individuals ( reverse individuals ) )
+)
+
+( defmethod average ( ( p population ) &aux ( sum 0 ) ) 
+    ( setf sum 0 )
+    ( dolist ( i ( population-individuals p ) )
+        ( display i )
+        ( setf sum ( + sum ( individual-fitness i ) ) )
+    )
+    ( float ( / sum ( i-size p ) ) )
+)
+
+( setf *select-demo* nil )
+
+( defmethod select-individual ( ( p population ) &aux i candidates rn )
+    ( setf candidates ( select-individuals p ) )
+    ( setf mfi ( most-fit-individual candidates ) )
+    ( if *select-demo* ( select-demo-helper candidates mfi ) )
+    mfi
+)
+
+( defmethod select-individuals ( ( p population ) &aux individuals candidates rn ) 
+    ( setf individuals ( population-individuals p ) )
+    ( setf candidates () )
+    ( dotimes ( i *selection-size* )
+        ( setf rn ( random *population-size* ) )
+        ( push ( nth rn individuals ) candidates )
+    )
+    candidates
+)
+
+( defmethod most-fit-individual ( ( l list ) &aux max-value max-individual )
+    ; ( setf max-individual ( car list ) )
+    ; ( setf max-value ( ))
+)
+
+( defmethod select-demo-helper ( ( l list ) ( i individual ) )
+    ( princ "The sample of individuals..." )
+    ( mapcar #'display l )
+    ( terpri )
+    ( princ "The most fit of the sample ..." ) ( terpri )
+    ( display i )
+    ( terpri )
+    nil 
+)
+
+( defmethod population-demo ( &aux p )
+    ( setf p ( initial-population ) )
+    ( display p )
+    ( format t "Average fitness = ~A~%~%" ( average p ) )
+    ( setf *select-demo* t )
+
+    ( format t "Sampling...~%~%" )
+    ( select-individual p ) ( terpri )
+
+    ( format t "Sampling...~%~%" )
+    ( select-individual p ) ( terpri )
+
+    ( format t "Sampling...~%~%" )
+    ( select-individual p ) ( terpri )
+)
