@@ -313,12 +313,24 @@
 )
 
 ( defmethod most-fit-individual ( ( l list ) &aux max-value max-individual )
-    ; ( setf max-individual ( car list ) )
-    ; ( setf max-value ( ))
+    ( setf max-individual ( car l ) )
+    ( setf max-value ( individual-fitness max-individual ) )
+
+    ( dolist ( i l  )
+        ( cond 
+            ( ( > ( individual-fitness i ) max-value ) 
+                ( setf max-individual i )
+                ( setf max-value ( individual-fitness i ) )
+            )
+        )
+    )
+
+    max-individual
 )
 
 ( defmethod select-demo-helper ( ( l list ) ( i individual ) )
     ( princ "The sample of individuals..." )
+    ( terpri )
     ( mapcar #'display l )
     ( terpri )
     ( princ "The most fit of the sample ..." ) ( terpri )
