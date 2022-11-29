@@ -399,3 +399,78 @@
         ( setf i n )
     )
 )
+
+;--------------------
+; Copy
+
+( setf *copy-demo* nil )
+
+( defconstant *pc-c* 40 )
+
+( defmethod perform-copies ( ( cp population ) ( np population ) )
+    ( dotimes ( i ( nr-copies ) )
+        ( perform-one-copy cp np )
+    )
+)
+
+( defmethod nr-copies ()
+    ( * ( / *pc-c* 100 ) *population-size* )
+)
+
+( defmethod perform-one-copy ( ( cp population ) ( np population )
+    &aux x m mm new-i )
+
+    ( setf m ( select-individual cp ) )
+
+    ( if *copy-demo* ( format t "Selected individual = ~%" ) )
+    ( if *copy-demo* ( display m ) )
+
+    ( setf mm ( maybe-mutate m ) )
+
+    ( if *copy-demo* ( format t "Possibly muted individual = ~&" ) )
+    ( if *copy-demo* ( display mm ) )
+
+    ( setf ( individual-number mm ) ( + 1 ( i-size np ) ) )
+
+    ( if *copy-demo* ( format t "Renumbered individual = ~&" ) )
+    ( if *copy-demo* ( display mm ) )
+
+    ( setf new-i ( new-individual ( + 1 ( i-size np ) ) ( individual-rbg-string mm ) ) )
+    ( setf
+        ( population-individuals np )
+        ( append ( population-individuals np ) ( list new-i ) )
+    )
+
+    nil
+)
+
+( defmethod empty-population ( ( cp population ) &aux np )
+    ( setf np ( make-instance 'population ) )
+    ( setf ( population-individuals np ) () )
+    ( setf ( population-generation np ) ( + 1 ( population-generation cp ) ) )
+    np
+)
+
+( defmethod perform-copies-demo ( &aux cp np )
+    ( setf cp ( initial-population ) )
+    ( setf np ( empty-population cp ) )
+
+    ( format t "-------------------------------------------------------------------------~%")
+    ( display np )
+    ( format t "~%~%---------------------------------------------------------------------~%")
+    
+    ( setf *select-demo* t )
+    ( setf *copy-demo* t )
+
+    ( dotimes ( i 10 )
+        ( perform-one-copy cp np )
+        ( format t "-----------------------------------------------------------------------~%")
+        ( display np )
+        ( format t "~%~%-------------------------------------------------------------------~%")
+    )
+
+    ( setf *select-demo* nil )
+    ( setf *copy-demo* nil )
+
+    nil
+)
