@@ -474,3 +474,151 @@
 
     nil
 )
+
+;--------------------
+; Crossover 
+
+( setf *crossover-demo* nil )
+
+( defconstant *pc-x* 60 )
+
+( defmethod perform-crossovers ( ( cp population ) ( np population ) )
+    ( dotimes ( i ( nr-crossovers ) )
+        ( perform-one-crossover cp np )
+    )
+)
+
+( defmethod nr-crossovers ()
+    ( * ( / *pc-x* 100 ) *population-size* )
+)
+
+( defmethod perform-one-crossover ( ( cp population ) ( np population ) )
+    ( let ( x m mm mother father new-i )
+        ( setf mother ( select-individual cp ) )
+        ( setf father ( select-individual cp ) )
+
+        ( if *crossover-demo* ( format t "Selected mother = ~%" ) )
+        ( if *crossover-demo* ( display mother ) )
+        ( if *crossover-demo* ( format t "Selected father = ~&" ) )
+        ( if *crossover-demo* ( display father ) )
+
+        ( setf m ( crossover mother father ) )
+
+        ( if *crossover-demo* ( format t "the crossover = ~&" ) )
+        ( if *crossover-demo* ( display m ) )
+
+        ( setf mm ( maybe-mutate m ) )
+
+        ( if *crossover-demo* ( format t "the possiblly mutated individual = ~&" ) )
+        ( if *crossover-demo* ( display mm ) )
+
+        ( setf ( individual-number mm ) ( + 1 ( i-size np ) ) )
+
+        ( if *crossover-demo* ( format t "the renumbered individual = ~&" ) )
+        ( if *crossover-demo* ( display mm ) )
+
+        ( setf new-i ( new-individual ( + 1 ( i-size np ) ) ( individual-rbg-string mm ) ) )
+        ( setf
+            ( population-individuals np )
+            ( append ( population-individuals np ) ( list new-i ) )
+        )
+    )
+    nil
+)
+
+( defmethod crossover ( ( mother individual ) ( father individual )
+    &aux mi fi x i )
+    ( setf mi (individual-rbg-string mother ) )
+    ( setf fi (individual-rbg-string father ) )
+    ( setf x ( crossover mi fi ) )
+    ( setf i ( new-individual 0 x ) )
+    i
+)
+
+( defmethod perform-crossovers-demo ( &aux cp np )
+    ( setf cp ( initial-population ) )
+    ( setf np ( empty-population cp ) )
+    ( format t "-------------------------------------------------------------------------~%" )
+    ( display np )
+    ( format t "~%~%---------------------------------------------------------------------~%" )
+
+    ( setf *select-demo* t )
+    ( setf *crossover-demo* t )
+    ( dotimes ( i 10 )
+        ( perform-one-crossover cp np )
+        ( format t "----------------------------------------------------------------------~%" )
+        ( display np )
+        ( format t "~%~%------------------------------------------------------------------~%" )
+    )
+
+    ( setf *select-demo* nil )
+    ( setf *crossover-demo* nil )
+    
+    nil
+)
+
+;; THE NEXT GENERATION METHOD FOR THE GA
+( defmethod next-generation ( ( cp population ) &aux np )
+    ( setf np ( empty-population cp ) )
+    ( perform-copies cp np )
+    ( perform-crossovers cp np )
+    np
+)
+
+;; THE GA!
+( defconstant *nr-generations* 25 )
+
+( defmethod ga ( &aux p )
+    ( format t "THE WORLD IS BLUE ~%~%" )
+
+    ( setf *fitness* #'fitness-b )
+    ( setf p ( initial-population ) )
+    ( terpri )
+    ( summarize p )
+
+    ( dotimes ( i *nr-generations* )
+        ( setf p ( next-generation p ) )
+        ( check-average p )
+    )
+
+    ( terpri )
+    ( summarize p )
+
+    ( format t "THE WORLD IS RED ~%~%" )
+
+    ( setf *fitness* #'fitness-r )
+
+    ( dotimes ( i *nr-generations* )
+        ( setf p ( next-generation p ) )
+        ( check-average p )
+    )
+
+    ( terpri )
+    ( summarize p )
+
+    ( format t "THE WORLD IS GREEN ~%~%" )
+
+    ( setf *fitness* #'fitness-g )
+
+    ( dotimes ( i *nr-generations* )
+        ( setf p ( next-generation p ) )
+        ( check-average p )
+    )
+    
+    ( terpri )
+    ( summarize p )
+)
+
+;; METHODS TO PROVIDE INFORMATION ON "PROGRESS"
+( defmethod summarize ( ( p population ) )
+    ( display p )
+    ( check-average p )
+    ( terpri )
+)
+
+( defmethod check-average ( ( p population ) )
+    ( format t "average fitness of populatioon ~A = ~A~%"
+        ( population-generation p )
+        ( average p )
+    )
+)
