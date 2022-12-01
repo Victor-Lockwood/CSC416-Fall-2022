@@ -45,10 +45,9 @@
 ;--------------------------------------------
 ; TASK 2 - SENTENCE MUTATION
 ;--------------------
-; Take a sentence and change a word to something else from the word bank.
-; As of now, everything is still very close to the original GA mimicked prior.
-; However, I modified some methods and functions to my liking, in part to simplify the code
-; and for it to make more sense to me.
+; Take a sentence and change a word to one that is of a different type.
+; For example, it's not particularly interesting to only swap an 'AND' for a 'BUT' 
+; when functionally they're pretty equivalent.
 ;--------------------------------------------
 
 ( defmethod mutation ( ( sentence list ) &aux position old-word new-word )
@@ -65,5 +64,56 @@
 ( defun get-new-word ( old-word )
     ( setf new-word ( word ) )
     ( if ( eq old-word new-word ) ( get-new-word old-word ) )
+
+    ( setf old-word-type ( get-word-type old-word ) )
+    ( setf new-word-type ( get-word-type new-word) )
+    ( if ( eq old-word-type new-word-type ) ( get-new-word old-word ) )
+
     new-word
+)
+
+( defun get-word-type ( word-to-check )
+    ( setf type nil )
+
+    ( cond
+        ( ( member word-to-check *articles* )
+            ( setf type 'ARTICLE )
+        )
+        ( ( member word-to-check *nouns* )
+            ( setf type 'NOUN )
+        )
+        ( ( member word-to-check *adjectives* )
+            ( setf type 'ADJECTIVE )
+        )
+        ( ( member word-to-check *conjunctions* )
+            ( setf type 'CONJ )
+        )
+        ( ( member word-to-check *verbs* )
+            ( setf type 'VERB )
+        )
+    )
+    type
+)
+
+
+;--------------------------------------------
+; TASK 3 - SENTENCE CROSSOVER
+;--------------------
+; Take two sentences and create a new one by crossing them over with each other.
+; I found an easier way of going about grabbing sections of lists from here:
+; https://stackoverflow.com/questions/1719551/getting-the-first-n-elements-of-a-list-in-common-lisp
+; I think it makes more sense to use a built-in method.
+;--------------------------------------------
+
+( defmethod crossover ( ( list1 list ) ( list2 list ) )
+    ( setf position ( + 1 ( random ( length list1 ) ) ) )
+
+    ( format t "Position: ~A~%" position )
+    ( if ( = position ( length list2 ) ) ( setf position ( - position 1 ) ) )
+    ( format t "Position Change: ~A~%" position )
+
+    ( append 
+        ( subseq list1 0 position ) 
+        ( subseq list2 position ( length list2 ) ) 
+    )
 )
