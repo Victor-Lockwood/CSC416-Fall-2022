@@ -2,9 +2,14 @@
 ; File: wildcardga.l
 ;----------------------------------------------------
 
-;--------------------
+;--------------------------------------------
 ; TASK 1 - WORD BANK AND SENTENCE CREATOR
 ;--------------------
+; From a set word bank, generate a sentence of a length dictated by *word-limit*.
+; The word bank is derived from 5 sub-banks, which will help us
+; create fitness metrics later.
+;--------------------------------------------
+
 
 ( load "lp.l" )
 ( setf *word-limit* 10 )
@@ -35,3 +40,7 @@
 
     sentence
 )
+
+;--------------------
+; TASK 2 - WORD BANK AND SENTENCE CREATOR
+;--------------------
