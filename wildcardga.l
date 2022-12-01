@@ -103,17 +103,17 @@
 ; I found an easier way of going about grabbing sections of lists from here:
 ; https://stackoverflow.com/questions/1719551/getting-the-first-n-elements-of-a-list-in-common-lisp
 ; I think it makes more sense to use a built-in method.
+;
+; My fitness metric(s) will end up giving points for fitting a grammar that will be defined
+; later on - to give those a fighting chance, my crossovers will be in word-phrases
+; in lengths 3, 6, and 7.
 ;--------------------------------------------
 
-( defmethod crossover ( ( list1 list ) ( list2 list ) )
-    ( setf position ( + 1 ( random ( length list1 ) ) ) )
-
-    ( format t "Position: ~A~%" position )
-    ( if ( = position ( length list2 ) ) ( setf position ( - position 1 ) ) )
-    ( format t "Position Change: ~A~%" position )
+( defmethod crossover ( ( father1 list ) ( father2 list ) )
+    ( setf position ( pick '( 3 6 7 ) ) )
 
     ( append 
-        ( subseq list1 0 position ) 
-        ( subseq list2 position ( length list2 ) ) 
+        ( subseq father1 0 position ) 
+        ( subseq father2 position ( length father2 ) ) 
     )
 )
