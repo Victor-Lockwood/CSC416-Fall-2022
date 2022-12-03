@@ -121,7 +121,7 @@
 
 ;--------------------------------------------
 ; TASK 4 - DEMOS FOR MUTATION AND CROSSOVER
-;--------------------
+;--------------------------------------------
 
 ( defmethod mutation-demo ( &aux start-sentence mutated-sentence ) 
     ( setf start-sentence ( create-sentence ) )
@@ -147,4 +147,118 @@
         ( setf child ( crossover father1 father2 ) )
         ( format t "Child    = ~A~%~%" child )
     )
+)
+
+;--------------------------------------------
+; TASK 5 - THE FITNESS METRIC
+;--------------------
+; There is only one fitness metric, but it's a rather complex one.  It checks for two main
+; parts: first that the structure is correct, and the second that if an article is placed
+; in the correct position that is used an appopriate article.
+;
+; The grammar structure is as follows:
+; S             ->      NOUNPHRASE VERBPHRASE CONJUNCTION VERBPHRASE 
+; NOUNPHRASE    ->      ARTICLE ADJECTIVE NOUN 
+; VERBPHRASE    ->      VERB ARTICLE NOUN 
+;
+; Where VERB, ADJECTIVE, NOUN, CONJUNCTION, ARTICLE and ADJECTIVE are members
+; of their previously defined banks (which is why I didn't define them again here).        
+;--------------------------------------------
+
+( defmethod fitness-grammar ( ( sentence list ) &aux word-types )
+    ( setf word-types ( mapcar #'get-word-type sentence ) )
+    ( setf fitness 0 )
+
+    ( setf found-article1 T )
+    ( setf found-article2 T )
+    ( setf found-article3 T )
+    
+    ; < ARTICLE ADJECTIVE NOUN >
+    ( if ( eq ( nth 0 word-types ) 'ARTICLE ) 
+        ( setf fitness ( + fitness 1 ) ) 
+        ( setf found-article1 nil )
+    ) 
+    ( if ( eq ( nth 1 word-types ) 'ADJECTIVE ) 
+        ( setf fitness ( + fitness 1 ) ) 
+    ) 
+    ( if ( eq ( nth 2 word-types ) 'NOUN ) 
+        ( setf fitness ( + fitness 1 ) ) 
+    ) 
+
+    ; < VERB ARTICLE NOUN >
+    ( if ( eq ( nth 3 word-types ) 'VERB ) 
+        ( setf fitness ( + fitness 1 ) ) 
+    ) 
+    ( if ( eq ( nth 4 word-types ) 'ARTICLE ) 
+        ( setf fitness ( + fitness 1 ) ) 
+        ( setf found-article2 nil )
+    ) 
+    ( if ( eq ( nth 5 word-types ) 'NOUN ) 
+        ( setf fitness ( + fitness 1 ) ) 
+    ) 
+
+    ; < CONJ >
+    ( if ( eq ( nth 6 word-types ) 'CONJ ) 
+        ( setf fitness ( + fitness 1 ) ) 
+    ) 
+
+    ; < VERB ARTICLE NOUN >
+    ( if ( eq ( nth 7 word-types ) 'VERB ) 
+        ( setf fitness ( + fitness 1 ) ) 
+    ) 
+    ( if ( eq ( nth 8 word-types ) 'ARTICLE ) 
+        ( setf fitness ( + fitness 1 ) ) 
+        ( setf found-article3 nil )
+    ) 
+    ( if ( eq ( nth 9 word-types ) 'NOUN ) 
+        ( setf fitness ( + fitness 1 ) ) 
+    ) 
+
+    ( if found-article1 
+        ( setf fitness ( + ( article-check ( nth 0 sentence ) ( nth 1 sentence ) ) fitness ) )
+    ) 
+
+    ( if found-article2
+        ( setf fitness ( + ( article-check ( nth 4 sentence ) ( nth 5 sentence ) ) fitness ) )
+    ) 
+
+    ( if found-article3
+        ( setf fitness ( + ( article-check ( nth 8 sentence ) ( nth 9 sentence ) ) fitness ) )
+    ) 
+
+    fitness
+)
+
+( defun article-check ( article check-word )
+    ( if ( eq article 'the ) ( return-from article-check 1 ) )
+
+    ( setf first-letter ( char ( string check-word ) 0 ) )
+    ( setf is-vowel ( vowel-p first-letter ) )
+
+    ( if ( and is-vowel ( eq article 'an ) )
+        ( return-from article-check 1 )
+    )
+    ( if ( and ( not is-vowel ) ( eq article 'a ) )
+        ( return-from article-check 1 )
+    )
+
+    0
+)
+
+; From: https://stackoverflow.com/questions/15759828/lisp-delete-vowels-from-a-string
+; Returns the character if found, which ultimately resolves to t
+( defun vowel-p ( char )
+    (find char "aeiou" :test #'char-equal)
+)
+
+( defmethod fitness-demo ( &aux test-sentence fitness ) 
+    ( setf test-sentence ( create-sentence ) )
+
+    ( format t "Sentence = ~A~%" test-sentence )
+    ( format t "Directly applying grammar fitness...~%" )
+    ( format t "fitness-grammar = ~A~%" ( fitness-grammar test-sentence ) )
+
+    ( format t "Indirectly applying grammar fitness...~%" )
+    ( setf fitness-metric #'fitness-grammar )
+    ( format t "fitness-grammar = ~A~%" ( funcall fitness-metric test-sentence ) )
 )
