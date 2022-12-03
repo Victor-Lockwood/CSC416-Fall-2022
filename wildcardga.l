@@ -262,3 +262,86 @@
     ( setf fitness-metric #'fitness-grammar )
     ( format t "fitness-grammar = ~A~%" ( funcall fitness-metric test-sentence ) )
 )
+
+
+;--------------------------------------------
+; TASK 6 - THE INDIVIDUAL CLASS
+;--------------------
+; This will have very little deviation from the RBG GA.
+;--------------------------------------------
+
+( defclass individual ()
+    (
+        ( sentence :accessor individual-sentence :initarg :sentence )
+        ( internal-fitness :accessor individual-internal-fitness :initarg :internal-fitness )
+        ( number :accessor individual-number :initarg :number )
+    )
+)
+
+( defmethod random-individual ( &aux my-sentence )
+    ( setf my-sentence ( create-sentence ) )
+
+    ( make-instance 'individual
+        :sentence my-sentence
+        :internal-fitness ( funcall *fitness* my-sentence )
+        :number 0
+    )
+)
+
+( defmethod new-individual ( ( num number ) ( input-sentence list ) )
+    ( make-instance 'individual
+        :sentence input-sentence
+        :internal-fitness ( funcall *fitness* input-sentence )
+        :number num
+    )
+)
+
+( defmethod display ( ( i individual ) )
+    ( prin1 ( individual-number i ) )
+    ( princ ( filler ( individual-number i ) ) )
+    ( prin1 ( individual-sentence i ) )
+    ( princ " " )
+    ( prin1 ( individual-internal-fitness i ) )
+    ( princ ( filler ( individual-internal-fitness i ) ) )
+    ( terpri )
+)
+
+( defmethod filler ( ( n number ) )
+    ( cond
+        ( ( < n 10 ) " " )
+        ( ( < n 100 ) " " )
+        ( ( < n 1000 ) " " )
+        ( ( < n 10000 ) " " )
+        ( ( < n 100000 ) " " )
+    )
+)
+
+( defmethod fitness-grammar ( ( i individual ) )
+    ( fitness-grammar ( individual-sentence i ) )
+)
+
+; i0 - i3: The individuals to be used 
+; one - three: Generated sentences to assign
+( defmethod individual-demo ( &aux i0 i1 i2 i3 one two three )
+    ( setf *fitness* #'fitness-grammar )
+
+    ( setf i0 ( random-individual ) )
+    ( display i0 )
+
+    ( setf one ( create-sentence ) )
+    ( setf i1 ( new-individual 1 one ) )
+    ( display i1 )
+
+    ( setf two ( create-sentence ) )
+    ( setf i2 ( new-individual 2 two ) )
+    ( display i2 )
+
+    ( setf three ( create-sentence ) )
+    ( setf i3 ( new-individual 3 three ) )
+    ( display i3 )
+
+    ( format t "Fitness of i0 = ~A~%" ( funcall *fitness* i0 ) )
+    ( format t "Fitness of i1 = ~A~%" ( funcall *fitness* i1 ) )
+    ( format t "Fitness of i2 = ~A~%" ( funcall *fitness* i2 ) )
+    ( format t "Fitness of i3 = ~A~%" ( funcall *fitness* i3 ) )
+)
