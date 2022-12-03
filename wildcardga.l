@@ -122,3 +122,29 @@
 ;--------------------------------------------
 ; TASK 4 - DEMOS FOR MUTATION AND CROSSOVER
 ;--------------------
+
+( defmethod mutation-demo ( &aux start-sentence mutated-sentence ) 
+    ( setf start-sentence ( create-sentence ) )
+
+    ( dotimes ( i 10 )
+        ( format t "--- ITERATION ~A --- ~%~%" i )
+        ( format t "Start Sentence   = ~A~%" start-sentence )
+
+        ( setf mutated-sentence ( mutation start-sentence ) )
+        ( format t "Mutated Sentence = ~A~%~%" mutated-sentence )
+    )
+)
+
+( defmethod crossover-demo ( &aux father1 father2 child )
+    ( setf father1 ( create-sentence ) )
+    ( setf father2 ( create-sentence ) )
+
+    ( dotimes ( i 10 )
+        ( format t "--- ITERATION ~A --- ~%~%" i )
+        ( format t "Father 1 = ~A~%" father1)
+        ( format t "Father 2 = ~A~%" father2)
+
+        ( setf child ( crossover father1 father2 ) )
+        ( format t "Child    = ~A~%~%" child )
+    )
+)
