@@ -345,3 +345,127 @@
     ( format t "Fitness of i2 = ~A~%" ( funcall *fitness* i2 ) )
     ( format t "Fitness of i3 = ~A~%" ( funcall *fitness* i3 ) )
 )
+
+
+;--------------------------------------------
+; TASK 7 - THE POPULATION CLASS
+;--------------------
+; This will have very little deviation from the RBG GA.
+; The neat thing about this class is it's pretty agnostic to the individuals themselves
+; so long as you kept naming consistent.
+;--------------------------------------------
+
+( defconstant *population-size* 100 )
+( defconstant *selection-size* 8 )
+( setf *fitness* #'fitness-grammar)
+
+( defclass population ()
+    (
+        ( individuals :accessor population-individuals :initarg :individuals )
+        ( generation :accessor population-generation :initform 0 )
+    )
+)
+
+; Only calling it "size" had issues for some reason
+( defmethod i-size ( ( p population ) )
+    ( length ( population-individuals p ) )
+)
+
+( defmethod display ( ( p population ) )
+    ( terpri ) ( terpri )
+    ( princ "Generation " )
+    ( prin1 ( population-generation p ) )
+    ( princ " population ..." )
+    ( terpri ) ( terpri )
+
+    ( dolist ( i ( population-individuals p ) )
+        ( display i )
+    )
+
+    ( terpri )
+)
+
+( defmethod initial-population ( &aux individuals )
+    ( setf individuals () )
+    ( dotimes ( i *population-size* ) 
+        ( push ( new-individual ( + i 1 ) ( create-sentence ) ) individuals )
+    )
+    ( make-instance 'population :individuals ( reverse individuals ) )
+)
+
+( defmethod average ( ( p population ) &aux ( sum 0 ) ) 
+    ( setf sum 0 )
+    ( dolist ( i ( population-individuals p ) )
+        ( display i )
+        ( setf sum ( + sum ( individual-internal-fitness i ) ) )
+    )
+    ( float ( / sum ( i-size p ) ) )
+)
+
+( setf *select-demo* nil )
+
+( defmethod select-individual ( ( p population ) &aux i candidates rn )
+    ( setf candidates ( select-individuals p ) )
+    ( setf mfi ( most-fit-individual candidates ) )
+    ( if *select-demo* ( select-demo-helper candidates mfi ) )
+    mfi
+)
+
+( defmethod select-individuals ( ( p population ) &aux individuals candidates rn ) 
+    ( setf individuals ( population-individuals p ) )
+    ( setf candidates () )
+    ( dotimes ( i *selection-size* )
+        ( setf rn ( random *population-size* ) )
+        ( push ( nth rn individuals ) candidates )
+    )
+    candidates
+)
+
+( defmethod most-fit-individual ( ( l list ) &aux max-value max-individual )
+    ( setf max-individual ( car l ) )
+    ( setf max-value ( individual-internal-fitness max-individual ) )
+
+    ( dolist ( i l  )
+        ( cond 
+            ( ( > ( individual-internal-fitness i ) max-value ) 
+                ( setf max-individual i )
+                ( setf max-value ( individual-internal-fitness i ) )
+            )
+        )
+    )
+
+    max-individual
+)
+
+( defmethod select-demo-helper ( ( l list ) ( i individual ) )
+    ( princ "The sample of individuals..." )
+    ( terpri )
+    ( mapcar #'display l )
+    ( terpri )
+    ( princ "The most fit of the sample ..." ) ( terpri )
+    ( display i )
+    ( terpri )
+    nil 
+)
+
+( defmethod population-demo ( &aux p )
+    ( setf p ( initial-population ) )
+    ( display p )
+    ( format t "Average fitness = ~A~%~%" ( average p ) )
+    ( setf *select-demo* t )
+
+    ( format t "Sampling...~%~%" )
+    ( select-individual p ) ( terpri )
+
+    ( format t "Sampling...~%~%" )
+    ( select-individual p ) ( terpri )
+
+    ( format t "Sampling...~%~%" )
+    ( select-individual p ) ( terpri )
+)
+
+;--------------------------------------------
+; TASK 9 - INCORPORATING MUTATION
+;--------------------
+; This will have very little deviation from the RBG GA.
+;--------------------------------------------
