@@ -117,3 +117,8 @@
         ( subseq father2 position ( length father2 ) ) 
     )
 )
+
+
+;--------------------------------------------
+; TASK 4 - DEMOS FOR MUTATION AND CROSSOVER
+;--------------------
