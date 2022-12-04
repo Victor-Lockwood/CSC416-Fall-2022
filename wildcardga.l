@@ -469,3 +469,57 @@
 ;--------------------
 ; This will have very little deviation from the RBG GA.
 ;--------------------------------------------
+
+( defmethod mutate ( ( i individual ) &aux mutation )
+    ( setf mutation ( mutation ( individual-sentence i ) ) )
+    ( make-instance 'individual
+        :number ( individual-number i )
+        :sentence mutation
+        :internal-fitness ( funcall *fitness* mutation )
+    )
+)
+
+; The percent of individuals to mutate
+( defconstant *pc-m* 50 )
+
+( defmethod maybe-mutate ( ( i individual ) )
+    ( if ( <= ( + 1 ( random 100 ) ) *pc-m* )
+        ( mutate i )
+        i
+    )
+)
+
+( defmethod mutate-demo ()
+    ( setf i ( random-individual ) )
+    ( display i )
+    ( dotimes ( x 20 )
+        ( setf i ( mutate i ) )
+        ( display i )
+    )
+)
+
+; I now understand my hubris in removing this originally.  Oh well.
+
+( defmethod display-nnl ( ( i individual ) )
+    ( prin1 ( individual-number i ) )
+    ( princ ( filler ( individual-number i ) ) )
+    ( prin1 ( individual-sentence i ) )
+    ( princ " " )
+    ( prin1 ( individual-internal-fitness i ) )
+    ( princ ( filler ( individual-internal-fitness i ) ) )
+)
+
+( defmethod maybe-mutate-demo ()
+    ( setf i ( random-individual ) )
+    ( display i )
+    ( dotimes ( x 20 )
+        ( setf n ( maybe-mutate i ) )
+        ( display-nnl n )
+
+        ; A * means a mutation occurred
+        ( if ( not ( equal n i ) ) ( princ " *" ) )
+        
+        ( terpri )
+        ( setf i n )
+    )
+)
