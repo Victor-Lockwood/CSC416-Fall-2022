@@ -465,7 +465,7 @@
 )
 
 ;--------------------------------------------
-; TASK 9 - INCORPORATING MUTATION
+; TASK 8 - INCORPORATING MUTATION
 ;--------------------
 ; This will have very little deviation from the RBG GA.
 ;--------------------------------------------
@@ -522,4 +522,80 @@
         ( terpri )
         ( setf i n )
     )
+)
+
+;--------------------------------------------
+; TASK 9 - COPY
+;--------------------
+; This will have very little deviation from the RBG GA.
+;--------------------------------------------
+( setf *copy-demo* nil )
+
+; Percent to copy
+( defconstant *pc-c* 40 )
+
+( defmethod perform-copies ( ( cp population ) ( np population ) )
+    ( dotimes ( i ( nr-copies ) )
+        ( perform-one-copy cp np )
+    )
+)
+
+; CP - Current Population
+; NP - New Population
+( defmethod perform-one-copy ( ( cp population ) ( np population )
+    &aux x m mm new-i )
+
+    ( setf m ( select-individual cp ) )
+
+    ( if *copy-demo* ( format t "Selected individual = ~%" ) )
+    ( if *copy-demo* ( display m ) )
+
+    ( setf mm ( maybe-mutate m ) )
+
+    ( if *copy-demo* ( format t "Possibly muted individual = ~&" ) )
+    ( if *copy-demo* ( display mm ) )
+
+    ( setf ( individual-number mm ) ( + 1 ( i-size np ) ) )
+
+    ( if *copy-demo* ( format t "Renumbered individual = ~&" ) )
+    ( if *copy-demo* ( display mm ) )
+
+    ( setf new-i ( new-individual ( + 1 ( i-size np ) ) ( individual-sentence mm ) ) )
+    ( setf
+        ( population-individuals np )
+        ( append ( population-individuals np ) ( list new-i ) )
+    )
+
+    nil
+)
+
+( defmethod empty-population ( ( cp population ) &aux np )
+    ( setf np ( make-instance 'population ) )
+    ( setf ( population-individuals np ) () )
+    ( setf ( population-generation np ) ( + 1 ( population-generation cp ) ) )
+    np
+)
+
+( defmethod perform-copies-demo ( &aux cp np )
+    ( setf cp ( initial-population ) )
+    ( setf np ( empty-population cp ) )
+
+    ( format t "-------------------------------------------------------------------------~%")
+    ( display np )
+    ( format t "~%~%---------------------------------------------------------------------~%")
+    
+    ( setf *select-demo* t )
+    ( setf *copy-demo* t )
+
+    ( dotimes ( i 10 )
+        ( perform-one-copy cp np )
+        ( format t "-----------------------------------------------------------------------~%")
+        ( display np )
+        ( format t "~%~%-------------------------------------------------------------------~%")
+    )
+
+    ( setf *select-demo* nil )
+    ( setf *copy-demo* nil )
+
+    nil
 )
