@@ -529,6 +529,7 @@
 ;--------------------
 ; This will have very little deviation from the RBG GA.
 ;--------------------------------------------
+
 ( setf *copy-demo* nil )
 
 ; Percent to copy
@@ -538,6 +539,10 @@
     ( dotimes ( i ( nr-copies ) )
         ( perform-one-copy cp np )
     )
+)
+
+( defmethod nr-copies ()
+    ( * ( / *pc-c* 100 ) *population-size* )
 )
 
 ; CP - Current Population
@@ -598,4 +603,138 @@
     ( setf *copy-demo* nil )
 
     nil
+)
+
+;--------------------------------------------
+; TASK 10 - CROSSOVER
+;--------------------
+; This will have very little deviation from the RBG GA.
+;--------------------------------------------
+
+( setf *crossover-demo* nil )
+
+; Percent crossover
+( defconstant *pc-x* 60 )
+
+( defmethod perform-crossovers ( ( cp population ) ( np population ) )
+    ( dotimes ( i ( nr-crossovers ) )
+        ( perform-one-crossover cp np )
+    )
+)
+
+; Calculates number of crossovers
+( defmethod nr-crossovers ()
+    ( * ( / *pc-x* 100 ) *population-size* )
+)
+
+( defmethod perform-one-crossover ( ( cp population ) ( np population ) )
+    ( let ( x m mm father1 father2 new-i )
+        ( setf father1 ( select-individual cp ) )
+        ( setf father2 ( select-individual cp ) )
+
+        ( if *crossover-demo* ( format t "Selected father1 = ~%" ) )
+        ( if *crossover-demo* ( display father1 ) )
+        ( if *crossover-demo* ( format t "Selected father2 = ~&" ) )
+        ( if *crossover-demo* ( display father2 ) )
+
+        ( setf m ( crossover father1 father2 ) )
+
+        ( if *crossover-demo* ( format t "The crossover = ~&" ) )
+        ( if *crossover-demo* ( display m ) )
+
+        ( setf mm ( maybe-mutate m ) )
+
+        ( if *crossover-demo* ( format t "The possibly mutated individual = ~&" ) )
+        ( if *crossover-demo* ( display mm ) )
+
+        ( setf ( individual-number mm ) ( + 1 ( i-size np ) ) )
+
+        ( if *crossover-demo* ( format t "The renumbered individual = ~&" ) )
+        ( if *crossover-demo* ( display mm ) )
+
+        ( setf new-i ( new-individual ( + 1 ( i-size np ) ) ( individual-sentence mm ) ) )
+        ( setf
+            ( population-individuals np )
+            ( append ( population-individuals np ) ( list new-i ) )
+        )
+    )
+    nil
+)
+
+( defmethod crossover ( ( father1 individual ) ( father2 individual )
+    &aux mi fi x i )
+    ( setf mi (individual-sentence father1 ) )
+    ( setf fi (individual-sentence father2 ) )
+    ( setf x ( crossover mi fi ) )
+    ( setf i ( new-individual 0 x ) )
+    i
+)
+
+( defmethod perform-crossovers-demo ( &aux cp np )
+    ( setf cp ( initial-population ) )
+    ( setf np ( empty-population cp ) )
+    ( format t "-------------------------------------------------------------------------~%" )
+    ( display np )
+    ( format t "~%~%---------------------------------------------------------------------~%" )
+
+    ( setf *select-demo* t )
+    ( setf *crossover-demo* t )
+    ( dotimes ( i 10 )
+        ( perform-one-crossover cp np )
+        ( format t "----------------------------------------------------------------------~%" )
+        ( display np )
+        ( format t "~%~%------------------------------------------------------------------~%" )
+    )
+
+    ( setf *select-demo* nil )
+    ( setf *crossover-demo* nil )
+    
+    nil
+)
+
+;--------------------------------------------
+; TASK 11 - GA
+;--------------------
+; This will have very little deviation from the RBG GA.
+; This is where the magic happens!
+;--------------------------------------------
+
+;; THE NEXT GENERATION METHOD FOR THE GA
+( defmethod next-generation ( ( cp population ) &aux np )
+    ( setf np ( empty-population cp ) )
+    ( perform-copies cp np )
+    ( perform-crossovers cp np )
+    np
+)
+
+;; THE GA!
+( defconstant *nr-generations* 25 )
+
+( defmethod ga ( &aux p )
+    ( setf *fitness* #'fitness-grammar )
+    ( setf p ( initial-population ) )
+    ( terpri )
+    ( summarize p )
+
+    ( dotimes ( i *nr-generations* )
+        ( setf p ( next-generation p ) )
+        ( check-average p )
+    )
+
+    ( terpri )
+    ( summarize p )
+)
+
+;; METHODS TO PROVIDE INFORMATION ON "PROGRESS"
+( defmethod summarize ( ( p population ) )
+    ( display p )
+    ( check-average p )
+    ( terpri )
+)
+
+( defmethod check-average ( ( p population ) )
+    ( format t "Average fitness of population ~A = ~A~%"
+        ( population-generation p )
+        ( average p )
+    )
 )
